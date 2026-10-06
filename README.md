@@ -123,6 +123,7 @@ Anything derivable is derived: "caught" is `party ∪ storage`, never a second c
 | Catch odds | Gen-1 style ratio, clamped 3%–95% | never impossible, never a guaranteed catch |
 | XP | `12 × foe level`, up to +50% underdog bonus | grinding stays optional |
 | Level up | automatic, learns moves up to 4 | the spec asks for no prompt |
+| Evolution | level triggers only, at the end of a won battle | the data carries stones and trades too, but the game has neither |
 | Struggle | fallback for Abra/Ditto/Metapod/Kakuna | without it a player could field a Pokémon that can never win |
 
 Damage follows the Gen-1 formula with STAB, a critical chance and the full modern 18-type chart —

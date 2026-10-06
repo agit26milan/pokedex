@@ -6,6 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { createSide, memberFromSide, sideFromMember } from '@/features/battle/logic/createSide';
 import { applyXp, xpReward } from '@/features/battle/logic/levelUp';
+import { evolveMember, evolutionFor } from '@/features/battle/logic/evolve';
+import { EvolutionMoment } from '@/features/battle/ui/EvolutionMoment';
 import {
   consumedFrom,
   foeCaptureChance,
@@ -60,6 +62,7 @@ export default function BattleScreen() {
   const [panel, setPanel] = useState<BattlePanel>('moves');
   const [activeMemberId, setActiveMemberId] = useState<number | null>(leaderId ?? party[0]?.id ?? null);
   const [settlement, setSettlement] = useState<Settlement | null>(null);
+  const [evolution, setEvolution] = useState<{ from: PartyMember; to: PartyMember; done: boolean } | null>(null);
 
   const rng = useRef(mulberry32(wildId * 7919 + wildLevel)).current;
   const settled = useRef(false);
@@ -81,6 +84,12 @@ export default function BattleScreen() {
         const reward = member ? xpReward(finished.foe.level, member.level) : 0;
         const grown = member ? applyXp(member, reward) : null;
         if (grown) useStore.getState().updateMember(index, grown.member);
+        const step = grown ? evolutionFor(grown.member.id, grown.member.level) : null;
+        const next = grown && step ? evolveMember(grown.member, step) : null;
+        if (grown && next) {
+          useStore.getState().updateMember(index, next);
+          setEvolution({ from: grown.member, to: next, done: false });
+        }
         if (rng() < DROP_CHANCE) useStore.getState().grantItem(rng() < 0.5 ? 'potion' : 'pokeBall', 1);
 
         const levels = grown?.levelsGained ? ` · now Lv ${grown.member.level}` : '';
@@ -214,8 +223,30 @@ export default function BattleScreen() {
           <View style={styles.resultCard}>
             <Text style={styles.resultTitle}>{OUTCOME_TITLE[settlement.outcome]}</Text>
             <Text style={styles.resultText}>{settlement.text}</Text>
-            <Pressable style={styles.continue} onPress={leave} accessibilityRole="button">
-              <Text style={styles.continueLabel}>{settlement.outcome === 'lost' ? 'BACK TO THE GRASS' : 'CONTINUE'}</Text>
+            {evolution && !evolution.done ? (
+              <EvolutionMoment
+                fromId={evolution.from.id}
+                fromName={evolution.from.name}
+                toId={evolution.to.id}
+                toName={evolution.to.name}
+                onDone={() => setEvolution((current) => (current ? { ...current, done: true } : current))}
+              />
+            ) : null}
+            {evolution && evolution.done ? (
+              <Text style={styles.resultText}>
+                {`${titleCase(evolution.to.name)} · Lv ${evolution.to.level} · ${evolution.to.hp}/${evolution.to.maxHp} HP`}
+              </Text>
+            ) : null}
+            <Pressable
+              style={[styles.continue, evolution && !evolution.done ? styles.continueHeld : null]}
+              onPress={leave}
+              disabled={Boolean(evolution && !evolution.done)}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: Boolean(evolution && !evolution.done) }}
+            >
+              <Text style={styles.continueLabel}>
+                {settlement.outcome === 'lost' ? 'BACK TO THE GRASS' : 'CONTINUE'}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -262,5 +293,6 @@ const styles = StyleSheet.create({
   resultTitle: { color: colors.accent, fontFamily: font.mono, fontSize: 12, letterSpacing: 3, textAlign: 'center' },
   resultText: { color: colors.text, fontSize: 13.5, lineHeight: 20, textAlign: 'center' },
   continue: { paddingVertical: 15, borderRadius: radius.lg, alignItems: 'center', backgroundColor: colors.accent },
+  continueHeld: { opacity: 0.35 },
   continueLabel: { color: colors.accentOn, fontWeight: '800', fontSize: 13, letterSpacing: 1 },
 });
