@@ -16,8 +16,14 @@ module.exports = defineConfig([
     },
   },
   {
-    // Last so it wins: build tooling reports progress on stdout by design.
+    // Last so they win: build tooling and the Jest setup file run under Node/Jest.
     files: ['scripts/**/*.ts'],
     rules: { 'no-console': 'off' },
+  },
+  {
+    files: ['jest.setup.js'],
+    languageOptions: {
+      globals: { jest: 'readonly', require: 'readonly', module: 'writable', __dirname: 'readonly' },
+    },
   },
 ]);

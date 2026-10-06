@@ -23,10 +23,12 @@ rather than a unit test.
 
 ## 3. Shared foundation
 
-- [ ] 3.1 `lib/rng.ts` (mulberry32) + unit tests, `lib/storage.ts` (AsyncStorage adapter), `shared/api/client.ts`
+- [x] 3.1 `lib/rng.ts` (mulberry32) + unit tests, `lib/storage.ts` (AsyncStorage adapter), `shared/api/client.ts`
       (axios instance with timeout + error normalization).
 - [ ] 3.2 Theme module: colors, spacing, type-color map (18 types) + `components/ui/*` (Button, Card, TypeBadge, Sprite).
-- [ ] 3.3 Root store with four slices + persist (version 1) and a selector hook built on `useShallow`.
+      _Tokens done (src/theme/tokens.ts, 18-type map). ui/* components still to write alongside the screens that use them._
+- [x] 3.3 Root store with four slices + persist (version 1) and a selector hook built on `useShallow`.
+      _Three slices shipped (party, world, pokedex) — the battle slice is transient and arrives with the engine (task 6.2/6.4)._
 
 ## 4. Glossary (fills the tab while Play is built)
 
