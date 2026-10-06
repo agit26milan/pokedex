@@ -104,6 +104,14 @@ rather than a unit test.
       _typecheck 0, lint 0, 137 tests across 17 suites — the count is read from the Jest summary, not estimated._
 - [ ] 8.2 `[E2E]` Two-minute tour on a real device via Expo Go QR: partner → tall grass → encounter → win → catch → Glossary
       shows the caught mark.
+      _Half verified on the emulator. DONE: Expo Go (SDK 57.0.0) opens the project from the `exp://` URL the QR encodes —
+      the real "Choose your partner" screen renders with all three starters and sprites, and tapping a card + the CTA
+      reaches the world screen (Bulbasaur LV 5, 19/19 HP, 10 balls, 3 potions). Also proven in dev mode: the React Native
+      Dev Menu opens (Reload / Open DevTools / Toggle Element Inspector / Show Perf Monitor), a live CDP target is exposed
+      on `localhost:8081/json/list`, and Fast Refresh applied a tab-icon fix with no rebuild. NOT DONE: walking to a tall
+      grass tile, the encounter, the battle and the catch were not driven by taps — blind taps into a maze are a poor
+      substitute. That half is covered by the headless tour test (`src/tour.test.ts`), the airplane-mode run (8.3) and the
+      release-APK launch (9.7). Screenshots: `~/Desktop/PokedexQuest-expo-go*.png`, `-devmenu.png`, `-world-fastrefresh.png`._
 - [x] 8.3 `[E2E]` Airplane mode run: world, battle, list, search, filter and detail all still work.
       _Verified on the emulator with `airplane_mode_on=1` (wifi and data off, status-bar plane icon visible): the Play tab
       renders, the Glossary renders all 151 entries with names, dex numbers and type badges, and the detail screen shows
