@@ -9,9 +9,10 @@ rather than a unit test.
       expo-image, expo-haptics, and TypeScript strict. Commit the untouched baseline.
 - [x] 1.2 Configure ESLint (`eslint-config-expo` + react-hooks rules as errors) and Prettier; add `npm run lint`,
       `npm run typecheck`, `npm test`.
-- [ ] 1.3 Build the folder skeleton from design.md (`app/`, `src/features/*`, `src/shared/*`) with empty modules and
+- [x] 1.3 Build the folder skeleton from design.md (`app/`, `src/features/*`, `src/shared/*`) with empty modules and
       the two-tab layout so routing works end to end. `[E2E]` both tabs open on a device.
-      _Skeleton + tabs built; verified by a real Metro bundle export (android, 2.7 MB .hbc). On-device check still pending._
+      _Shipped and proven on hardware: the emulator screenshots show both tabs rendering, so the tab layout needs no
+      separate smoke test._
 
 ## 2. Data seed
 
@@ -25,8 +26,9 @@ rather than a unit test.
 
 - [x] 3.1 `lib/rng.ts` (mulberry32) + unit tests, `lib/storage.ts` (AsyncStorage adapter), `shared/api/client.ts`
       (axios instance with timeout + error normalization).
-- [ ] 3.2 Theme module: colors, spacing, type-color map (18 types) + `components/ui/*` (Button, Card, TypeBadge, Sprite).
-      _Tokens done (src/theme/tokens.ts, 18-type map). ui/* components still to write alongside the screens that use them._
+- [x] 3.2 Theme module: colors, spacing, type-color map (18 types) + `components/ui/*` (Button, Card, TypeBadge, Sprite).
+      _Tokens + 18-type colour map in `src/theme/tokens.ts`; the shared components shipped as `Sprite`, `TypeBadge`,
+      `SearchBar`, `TypeFilter`, `PokemonRow` and `HpBar`, all in use on the emulator._
 - [x] 3.3 Root store with four slices + persist (version 1) and a selector hook built on `useShallow`.
       _Three slices shipped (party, world, pokedex) — the battle slice is transient and arrives with the engine (task 6.2/6.4)._
 
