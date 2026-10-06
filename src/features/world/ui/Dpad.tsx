@@ -13,10 +13,6 @@ interface DpadProps {
   onToggleSprint: () => void;
 }
 
-/**
- * Grid movement is discrete, so a hold-to-repeat D-pad beats a fake analog stick: fewer
- * moving parts, keyboard/screen-reader friendly, and no drag-vs-tap ambiguity.
- */
 export function Dpad({ onStep, sprint, onToggleSprint }: DpadProps) {
   return (
     <View style={styles.controls}>

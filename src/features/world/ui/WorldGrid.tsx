@@ -38,14 +38,12 @@ export function WorldGrid({ worldSeed, position, partnerId, onMove }: WorldGridP
   const chunkX = chunkOf(position.x);
   const chunkY = chunkOf(position.y);
 
-  // Regenerating only at a chunk boundary means one cheap re-render per 20 tiles walked.
   const chunk = useMemo(() => generateChunk(worldSeed, chunkX, chunkY), [worldSeed, chunkX, chunkY]);
   const reachable = useMemo(() => reachableTiles(worldSeed, position), [worldSeed, position]);
 
   const offsetX = useSharedValue(0);
   const offsetY = useSharedValue(0);
 
-  // The camera follows the player on the UI thread, so walking never re-renders a tile.
   useEffect(() => {
     const target = (axis: number, origin: number, view: number) => -(axis - origin) * TILE_SIZE + (view - TILE_SIZE) / 2;
     offsetX.value = withTiming(target(position.x, chunkX * CHUNK_SIZE, VIEW_W), { duration: 170 });

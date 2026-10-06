@@ -1,3 +1,7 @@
+import type { MoveSlot } from '@/shared/data/moves';
+
+export type { MoveSlot };
+
 export interface PartyMember {
   id: number;
   name: string;
@@ -5,7 +9,7 @@ export interface PartyMember {
   xp: number;
   hp: number;
   maxHp: number;
-  moves: string[];
+  moves: MoveSlot[];
 }
 
 export interface Bag {

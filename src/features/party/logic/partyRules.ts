@@ -18,10 +18,7 @@ export const isInRoster = (
   id: number,
 ): boolean => party.some((m) => m.id === id) || storage.some((m) => m.id === id);
 
-/**
- * A catch always counts as caught, but only the first six live in the party. Kept pure
- * so the overflow rule is unit-tested once and reused by the store.
- */
+
 export function placeInRoster(
   party: readonly PartyMember[],
   storage: readonly PartyMember[],

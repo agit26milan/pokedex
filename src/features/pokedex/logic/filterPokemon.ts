@@ -7,11 +7,7 @@ export interface DexFilter {
 
 const normalise = (value: string): string => value.trim().toLowerCase();
 
-/**
- * Search matches the name or the dex number ("pika", "25", "#025").
- * Type filters combine as OR between selected types and AND with the search,
- * so the result is the intersection of both conditions.
- */
+
 export function filterPokemon(entries: readonly DexEntry[], { query, types }: DexFilter): DexEntry[] {
   const needle = normalise(query).replace(/^#/, '');
   return entries.filter((entry) => {

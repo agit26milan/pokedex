@@ -2,6 +2,7 @@ import type { StateCreator } from 'zustand';
 
 import { maxHpFor } from '@/features/battle/logic/stats';
 import { getEntry, movesetFor } from '@/shared/data/dex';
+import { fullPp, toSlots } from '@/shared/data/moves';
 import { placeInRoster } from '../logic/partyRules';
 import {
   INITIAL_BAG,
@@ -41,7 +42,7 @@ export function createMember(id: number, level: number): PartyMember | undefined
     xp: level ** 3,
     hp: maxHp,
     maxHp,
-    moves: movesetFor(entry, level),
+    moves: toSlots(movesetFor(entry, level)),
   };
 }
 
@@ -93,6 +94,8 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
       party: get().party.map((member) => ({
         ...member,
         hp: Math.min(member.maxHp, Math.max(member.hp, Math.round(member.maxHp * fraction))),
+        // Losing heals the party and refills PP; together they are the floor that keeps a run playable.
+        moves: fullPp(member.moves),
       })),
     });
   },

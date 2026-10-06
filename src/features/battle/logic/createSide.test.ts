@@ -1,5 +1,5 @@
 import { createMember } from '@/features/party/store/partySlice';
-import { isDamaging } from '@/shared/data/moves';
+import { isDamaging, maxPpOf } from '@/shared/data/moves';
 import { createSide, memberFromSide, sideFromMember } from './createSide';
 
 describe('createSide', () => {
@@ -10,6 +10,11 @@ describe('createSide', () => {
     expect(side.types).toEqual(['electric']);
     expect(side.moves.length).toBeGreaterThan(0);
     expect(side.captureRate).toBeGreaterThan(0);
+  });
+
+  it('starts a wild side at full PP', () => {
+    const side = createSide(25, 8)!;
+    side.moves.forEach((move) => expect(move.pp).toBe(move.maxPp));
   });
 
   it('gives a Pokémon with no damaging move a Struggle fallback', () => {
@@ -40,16 +45,26 @@ describe('sideFromMember', () => {
 
     expect(side.hp).toBe(7);
     expect(side.maxHp).toBe(member.maxHp);
-    expect(side.moves.map((move) => move.name)).toEqual(member.moves);
+    expect(side.moves.map((move) => move.name)).toEqual(member.moves.map((slot) => slot.name));
   });
 
-  it('round-trips the battle result back onto the member', () => {
+  it('carries spent PP into the battle instead of refilling it', () => {
+    const member = createMember(4, 5)!;
+    const spent = { ...member, moves: member.moves.map((slot, index) => (index === 0 ? { ...slot, pp: 1 } : slot)) };
+
+    const side = sideFromMember(spent)!;
+    expect(side.moves[0]!.pp).toBe(1);
+    expect(side.moves[0]!.maxPp).toBe(maxPpOf(side.moves[0]!.name));
+  });
+
+  it('round-trips the battle result back onto the member, PP included', () => {
     const member = createMember(4, 5)!;
     const side = sideFromMember(member)!;
-    const updated = memberFromSide(member, { ...side, hp: 3 });
+    const drained = { ...side, hp: 3, moves: side.moves.map((move, index) => (index === 0 ? { ...move, pp: 2 } : move)) };
+    const updated = memberFromSide(member, drained);
 
     expect(updated.hp).toBe(3);
     expect(updated.id).toBe(member.id);
-    expect(updated.moves).toEqual(side.moves.map((move) => move.name));
+    expect(updated.moves).toEqual(drained.moves.map((move) => ({ name: move.name, pp: move.pp })));
   });
 });

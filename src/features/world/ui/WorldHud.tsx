@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Sprite } from '@/shared/components/Sprite';
+import { maxPpOf } from '@/shared/data/moves';
 import { titleCase } from '@/shared/lib/format';
 import type { Bag, PartyMember } from '@/features/party/types';
 import { colors, font, radius, spacing } from '@/theme/tokens';
@@ -15,6 +16,9 @@ interface WorldHudProps {
 
 export function WorldHud({ partner, bag, steps, encounterRisk, chunkLabel }: WorldHudProps) {
   const hpRatio = partner ? Math.max(0, Math.min(1, partner.hp / partner.maxHp)) : 0;
+  // PP is persisted now, so the card has to show it: a disabled move button should never be a surprise.
+  const pp = partner ? partner.moves.reduce((total, slot) => total + slot.pp, 0) : 0;
+  const maxPp = partner ? partner.moves.reduce((total, slot) => total + maxPpOf(slot.name), 0) : 0;
 
   return (
     <View style={styles.wrapper}>
@@ -26,8 +30,8 @@ export function WorldHud({ partner, bag, steps, encounterRisk, chunkLabel }: Wor
                 <Sprite id={partner.id} size={30} />
                 <View>
                   <Text style={styles.name}>{titleCase(partner.name)}</Text>
-                  <Text style={styles.level}>
-                    LV {partner.level} · {partner.hp}/{partner.maxHp} HP
+                  <Text style={[styles.level, pp <= 0 && styles.levelEmpty]}>
+                    LV {partner.level} · {partner.hp}/{partner.maxHp} HP · PP {pp}/{maxPp}
                   </Text>
                 </View>
               </View>
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
   who: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   name: { color: colors.text, fontWeight: '800', fontSize: 13.5 },
   level: { color: colors.accent, fontFamily: font.mono, fontSize: 9.5, marginTop: 3 },
+  levelEmpty: { color: colors.danger },
   track: { height: 6, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.10)', overflow: 'hidden', marginTop: 8 },
   fill: { height: '100%', borderRadius: 99, backgroundColor: colors.accent },
   kit: { gap: 6, justifyContent: 'center' },

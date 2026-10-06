@@ -1,4 +1,6 @@
 import type { Rng } from '@/shared/lib/rng';
+import type { MoveInfo } from '@/shared/data/moves';
+import type { Stats } from './stats';
 import { effectiveness, hasStab } from './typeChart';
 
 export const CRIT_CHANCE = 0.0625;
@@ -22,10 +24,20 @@ export interface DamageResult {
   effectiveness: number;
 }
 
-/**
- * Gen-1 style damage, minus individual values: deterministic apart from the injected RNG,
- * which is what lets a whole battle be replayed in a test.
- */
+
+/** A special move fights with special attack and special defence; everything else uses the physical pair. */
+export function pickStats(
+  attacker: Stats,
+  defender: Stats,
+  damageClass: MoveInfo['damageClass'],
+): { attackerAttack: number; defenderDefense: number } {
+  const special = damageClass === 'special';
+  return {
+    attackerAttack: special ? attacker.specialAttack : attacker.attack,
+    defenderDefense: special ? defender.specialDefense : defender.defense,
+  };
+}
+
 export function computeDamage(input: DamageInput): DamageResult {
   const typeMultiplier = effectiveness(input.moveType, input.defenderTypes);
   if (typeMultiplier === 0 || input.movePower <= 0) {

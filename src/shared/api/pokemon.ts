@@ -48,7 +48,6 @@ export async function getEnrichedDetail(id: number): Promise<FetchResult<Enriche
       flavorText: pickEnglishFlavor(species.data),
       genus: species.data.genera.find((item) => item.language.name === 'en')?.genus ?? null,
     };
-
     await writeCache(cacheKey(id), detail);
     return { ok: true, data: detail };
   } catch (error) {

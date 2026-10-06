@@ -1,26 +1,23 @@
-import type { PartyMember } from '@/features/party/types';
-import { MOVES, getEntry, movesetFor } from '@/shared/data/dex';
-import { hasDamagingMove, STRUGGLE } from '@/shared/data/moves';
+import type { MoveSlot, PartyMember } from '@/features/party/types';
+import { getEntry, movesetFor } from '@/shared/data/dex';
+import { maxPpOf, toSlots, withUsableMove } from '@/shared/data/moves';
 import { statsAt } from './stats';
 import type { BattleSide } from './turnEngine';
 
-const FALLBACK_PP = 10;
 const DEFAULT_MOVE_COUNT = 4;
 
 /**
- * Abra, Ditto, Metapod and Kakuna have no damaging level-up move. Without this the player
+ * Abra, Ditto, Metapod and Kakuna have no damaging level-up move. Without a fallback the player
  * could field one and be unable to ever win, so Struggle joins the moveset as a last resort.
+ * `withUsableMove` lives in the shared moves module so level-up applies the same rule.
  */
-const withFallback = (names: readonly string[]): string[] =>
-  hasDamagingMove(names) ? [...names] : [...names, STRUGGLE];
-
-const toBattleMoves = (names: readonly string[]) =>
-  withFallback(names).map((name) => {
-    const pp = MOVES[name]?.pp ?? FALLBACK_PP;
-    return { name, pp, maxPp: pp };
+const battleMoves = (slots: readonly MoveSlot[]) =>
+  withUsableMove(slots).map((slot) => {
+    const maxPp = maxPpOf(slot.name);
+    return { name: slot.name, pp: Math.min(slot.pp, maxPp), maxPp };
   });
 
-/** Wild or freshly built opponent straight from the seed. */
+/** Wild or freshly built opponent straight from the seed, at full PP. */
 export function createSide(id: number, level: number): BattleSide | undefined {
   const entry = getEntry(id);
   if (!entry) return undefined;
@@ -33,17 +30,17 @@ export function createSide(id: number, level: number): BattleSide | undefined {
     maxHp: stats.hp,
     stats,
     types: entry.types,
-    moves: toBattleMoves(movesetFor(entry, level, DEFAULT_MOVE_COUNT)),
+    moves: battleMoves(toSlots(movesetFor(entry, level, DEFAULT_MOVE_COUNT))),
     captureRate: entry.captureRate,
   };
 }
 
-/** Player side keeps the HP and moves the party member already earned. */
+/** Player side keeps the HP and the PP the party member already spent. */
 export function sideFromMember(member: PartyMember): BattleSide | undefined {
   const entry = getEntry(member.id);
   if (!entry) return undefined;
   const stats = statsAt(entry, member.level);
-  const moves = member.moves.length > 0 ? member.moves : movesetFor(entry, member.level, DEFAULT_MOVE_COUNT);
+  const slots = member.moves.length > 0 ? member.moves : toSlots(movesetFor(entry, member.level, DEFAULT_MOVE_COUNT));
   return {
     id: member.id,
     name: member.name,
@@ -52,12 +49,17 @@ export function sideFromMember(member: PartyMember): BattleSide | undefined {
     maxHp: member.maxHp,
     stats,
     types: entry.types,
-    moves: toBattleMoves(moves),
+    moves: battleMoves(slots),
     captureRate: entry.captureRate,
   };
 }
 
-/** Writes the battle result back onto the party member. */
+/** Writes the battle result back onto the party member, PP included, so it survives the battle. */
 export function memberFromSide(member: PartyMember, side: BattleSide): PartyMember {
-  return { ...member, hp: side.hp, maxHp: side.maxHp, moves: side.moves.map((move) => move.name) };
+  return {
+    ...member,
+    hp: side.hp,
+    maxHp: side.maxHp,
+    moves: side.moves.map((move) => ({ name: move.name, pp: move.pp })),
+  };
 }

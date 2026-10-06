@@ -4,7 +4,9 @@ import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { throwBall } from '@/features/battle/logic/worldThrow';
 import { PartnerPicker } from '@/features/party/ui/PartnerPicker';
+import { createMember } from '@/features/party/store/partySlice';
 import { Dpad } from '@/features/world/ui/Dpad';
 import { EncounterSheet } from '@/features/world/ui/EncounterSheet';
 import { WorldGrid } from '@/features/world/ui/WorldGrid';
@@ -12,6 +14,8 @@ import { WorldHud } from '@/features/world/ui/WorldHud';
 import { ENCOUNTER_RATE, rollEncounter } from '@/features/world/logic/rollEncounter';
 import { rollWild, type WildEncounter } from '@/features/world/logic/rollWild';
 import { chunkOf, isBlocked, nextPosition, tileAt, type Direction } from '@/features/world/logic/world';
+import { getEntry } from '@/shared/data/dex';
+import { titleCase } from '@/shared/lib/format';
 import { mulberry32 } from '@/shared/lib/rng';
 import { useStore } from '@/store';
 import { colors, spacing } from '@/theme/tokens';
@@ -31,6 +35,7 @@ export default function PlayScreen() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [sprint, setSprint] = useState(false);
   const [wild, setWild] = useState<WildEncounter | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // One seeded stream per run keeps encounters reproducible for tests and debugging.
   const rng = useRef(mulberry32(worldSeed)).current;
@@ -45,7 +50,6 @@ export default function PlayScreen() {
     (direction: Direction) => {
       const state = useStore.getState();
       if (state.pendingEncounter) return;
-
       const target = nextPosition(state.position, direction);
       const tile = tileAt(state.worldSeed, target.x, target.y);
 
@@ -65,6 +69,7 @@ export default function PlayScreen() {
       if (roll.encounter) {
         state.setPendingEncounter(tile);
         setWild(rollWild(rng, state.party[0]?.level ?? 5));
+        setNotice(null);
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         return;
       }
@@ -78,7 +83,35 @@ export default function PlayScreen() {
     const state = useStore.getState();
     state.markEncounterResolved();
     setWild(null);
+    setNotice(null);
   }, []);
+
+  /**
+   * F5: throwing from the sheet spends a real ball and rolls the real odds, with the wild at full HP. A failed throw
+   * spends the ball and leaves the wild in place, so battling or running stay available.
+   */
+  const onThrowBall = useCallback(() => {
+    if (!wild) return;
+    const state = useStore.getState();
+    if (!state.spendItem('pokeBall')) return;
+
+    const attempt = throwBall(wild.id, 'pokeBall', rng);
+    if (!attempt) return;
+
+    if (attempt.caught) {
+      const caught = createMember(wild.id, wild.level);
+      if (caught) state.addCaught(caught);
+      state.markEncounterResolved();
+      setWild(null);
+      setNotice(null);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      return;
+    }
+
+    const name = titleCase(getEntry(wild.id)?.name ?? 'it');
+    setNotice(`${name} broke free — ${Math.round(attempt.chance * 100)}% odds. Throw again or battle it.`);
+    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  }, [rng, wild]);
 
   const onBattle = useCallback(() => {
     if (!wild) return;
@@ -108,7 +141,14 @@ export default function PlayScreen() {
       <Dpad onStep={onMove} sprint={sprint} onToggleSprint={() => setSprint((value) => !value)} />
 
       {pendingEncounter && wild ? (
-        <EncounterSheet wild={wild} balls={bag.pokeBall} onBattle={onBattle} onRun={onRun} />
+        <EncounterSheet
+          wild={wild}
+          balls={bag.pokeBall}
+          notice={notice ?? undefined}
+          onBattle={onBattle}
+          onThrowBall={onThrowBall}
+          onRun={onRun}
+        />
       ) : null}
     </SafeAreaView>
   );

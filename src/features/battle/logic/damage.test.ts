@@ -1,5 +1,7 @@
 import type { Rng } from '@/shared/lib/rng';
-import { computeDamage } from './damage';
+import { getEntry } from '@/shared/data/dex';
+import { computeDamage, pickStats } from './damage';
+import { statsAt } from './stats';
 
 const fixed = (value: number): Rng => () => value;
 
@@ -51,5 +53,42 @@ describe('computeDamage', () => {
     const a = computeDamage({ ...base, rng: fixed(0.42) });
     const b = computeDamage({ ...base, rng: fixed(0.42) });
     expect(a).toEqual(b);
+  });
+});
+
+// F1: before this fix every move resolved against attack/defence, so a special attacker hit like a physical one.
+// Gengar (130 special attack / 65 attack) against Snorlax (65 defence / 110 special defence) is the cleanest probe:
+// the two pairs point in opposite directions, so a special move must do more and a physical move must do less.
+describe('damage class decides which stats fight', () => {
+  const attacker = statsAt(getEntry(94)!, 30); // gengar
+  const defender = statsAt(getEntry(143)!, 30); // snorlax
+
+  it('a special move fights with special attack against special defence', () => {
+    expect(pickStats(attacker, defender, 'special')).toEqual({
+      attackerAttack: attacker.specialAttack,
+      defenderDefense: defender.specialDefense,
+    });
+  });
+
+  it('a physical move keeps attack against defence', () => {
+    expect(pickStats(attacker, defender, 'physical')).toEqual({
+      attackerAttack: attacker.attack,
+      defenderDefense: defender.defense,
+    });
+  });
+
+  it('a status move resolves as physical and then deals nothing', () => {
+    expect(pickStats(attacker, defender, 'status')).toEqual({
+      attackerAttack: attacker.attack,
+      defenderDefense: defender.defense,
+    });
+  });
+
+  it('makes a special attacker special, not physical', () => {
+    const same = { attackerLevel: 30, movePower: 60, moveType: 'normal', attackerTypes: ['ghost'], defenderTypes: ['normal'] };
+    const special = computeDamage({ ...same, ...pickStats(attacker, defender, 'special'), rng: fixed(0.5) });
+    const physical = computeDamage({ ...same, ...pickStats(attacker, defender, 'physical'), rng: fixed(0.5) });
+
+    expect(special.damage).toBeGreaterThan(physical.damage);
   });
 });

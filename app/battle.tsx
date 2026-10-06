@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { createSide, memberFromSide, sideFromMember } from '@/features/battle/logic/createSide';
 import { applyXp, xpReward } from '@/features/battle/logic/levelUp';
 import {
+  consumedFrom,
   foeCaptureChance,
   resolveTurn,
   type BallName,
@@ -14,6 +15,7 @@ import {
   type BattleEvent,
   type BattleState,
 } from '@/features/battle/logic/turnEngine';
+import { sideSync } from '@/features/battle/logic/syncParty';
 import { BattleView, type BattlePanel } from '@/features/battle/ui/BattleView';
 import { createMember } from '@/features/party/store/partySlice';
 import type { PartyMember } from '@/features/party/types';
@@ -114,13 +116,31 @@ export default function BattleScreen() {
       if (!battle || battle.outcome !== 'ongoing') return;
 
       const store = useStore.getState();
-      const paid = action.kind === 'ball' ? store.spendItem(action.ball) : action.kind === 'item' ? store.spendItem('potion') : true;
-      if (!paid) {
+      const affordable =
+        action.kind === 'ball' ? store.bag[action.ball] > 0 : action.kind === 'item' ? store.bag.potion > 0 : true;
+      if (!affordable) {
         setEvents([{ kind: 'ball', text: 'Nothing left in the bag for that.' }]);
         return;
       }
 
       const resolved = resolveTurn(battle, action, rng);
+
+      // F3: the engine decides whether the item was used, and only then does the bag pay for it. A potion refused
+      // at full HP leaves the bag untouched.
+      if (consumedFrom(resolved.events)) {
+        const spent = action.kind === 'ball' ? store.spendItem(action.ball) : action.kind === 'item' ? store.spendItem('potion') : true;
+        if (!spent) return;
+      }
+
+      // F2: whoever took part in this turn keeps its HP and PP — for a switch that is the member from before it.
+      const sync = sideSync(action, activeMemberId, battle.player, resolved.state.player);
+      if (sync) {
+        const index = useStore.getState().party.findIndex((member) => member.id === sync.memberId);
+        if (index >= 0) {
+          useStore.getState().updateMember(index, memberFromSide(useStore.getState().party[index]!, sync.side));
+        }
+      }
+
       const index = useStore.getState().party.findIndex((member) => member.id === activeMemberId);
       const reserve = useStore
         .getState()
@@ -140,13 +160,22 @@ export default function BattleScreen() {
     (member: PartyMember) => {
       const side = sideFromMember(member);
       if (!side) return;
+
+      // F2: the member leaving the field is written back first, so the damage and PP it took here are not erased.
+      if (battle && activeMemberId !== null) {
+        const leavingIndex = party.findIndex((current) => current.id === activeMemberId);
+        if (leavingIndex >= 0) {
+          useStore.getState().updateMember(leavingIndex, memberFromSide(party[leavingIndex]!, battle.player));
+        }
+      }
+
       settled.current = false;
       setActiveMemberId(member.id);
       setPanel('moves');
       setEvents([{ kind: 'switch', text: `Go, ${titleCase(member.name)}!` }]);
       setBattle((current) => (current ? { ...current, player: side, outcome: 'ongoing' } : current));
     },
-    [],
+    [activeMemberId, battle, party],
   );
 
   const leave = useCallback(() => {

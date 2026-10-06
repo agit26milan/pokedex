@@ -39,14 +39,9 @@ const byId = new Map(POKEDEX.map((entry) => [entry.id, entry]));
 
 export const getEntry = (id: number): DexEntry | undefined => byId.get(id);
 
-/** Moves as of a level. Entries with no damaging move in Gen 1 keep their status-only list. */
 export const learnedBy = (entry: DexEntry, level: number): string[] =>
   entry.moves.filter((move) => move.level <= level).map((move) => move.name);
 
-/**
- * Up to `max` moves a Pokémon of this level would know. Prefers the most recently
- * learned damaging moves so an attacker always has something to hit with.
- */
 export function movesetFor(entry: DexEntry, level: number, max = 4): string[] {
   const learned = entry.moves.filter((move) => move.level <= level);
   const damaging = learned.filter((move) => isDamaging(move.name));

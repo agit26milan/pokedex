@@ -1,5 +1,6 @@
 import type { PartyMember } from '@/features/party/types';
 import { getEntry, movesetFor } from '@/shared/data/dex';
+import { toSlots, withUsableMove } from '@/shared/data/moves';
 import { levelFromXp, maxHpFor } from './stats';
 
 const XP_PER_FOE_LEVEL = 12;
@@ -29,7 +30,9 @@ export function applyXp(member: PartyMember, gained: number): LevelUpResult {
   const level = Math.max(member.level, levelFromXp(xp));
   if (level === member.level) return { member: { ...member, xp }, levelsGained: 0, learned: [] };
 
-  const moves = movesetFor(entry, level, MOVE_SLOTS);
+  // A level up also refills PP: it and defeat are the only two recovery paths, so they are what keeps a
+  // persisted PP pool from ever stranding a run with nothing usable (design D-F4).
+  const moves = withUsableMove(toSlots(movesetFor(entry, level, MOVE_SLOTS)));
   const maxHp = maxHpFor(entry, level);
 
   return {
@@ -43,6 +46,6 @@ export function applyXp(member: PartyMember, gained: number): LevelUpResult {
       moves,
     },
     levelsGained: level - member.level,
-    learned: moves.filter((move) => !member.moves.includes(move)),
+    learned: moves.map((move) => move.name).filter((name) => !member.moves.some((slot) => slot.name === name)),
   };
 }

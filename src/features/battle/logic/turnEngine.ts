@@ -2,7 +2,7 @@ import { MOVES } from '@/shared/data/dex';
 import { isDamaging, moveInfo, STRUGGLE } from '@/shared/data/moves';
 import { pickOne, rollChance, type Rng } from '@/shared/lib/rng';
 import { catchChance, rollCatch } from './catchRate';
-import { computeDamage } from './damage';
+import { computeDamage, pickStats } from './damage';
 import type { Stats } from './stats';
 import { effectiveness } from './typeChart';
 
@@ -49,6 +49,8 @@ export interface BattleEvent {
   damage?: number;
   effectiveness?: number;
   critical?: boolean;
+  /** Set on the action that spends a bag item, so the caller spends it only when the engine actually used it. */
+  consumed?: boolean;
 }
 
 export const BALL_BONUS: Record<BallName, number> = { pokeBall: 1, greatBall: 1.5 };
@@ -86,15 +88,13 @@ function attack(side: BattleSideName, attacker: BattleSide, defender: BattleSide
 
   const hit = computeDamage({
     attackerLevel: attacker.level,
-    attackerAttack: attacker.stats.attack,
-    defenderDefense: defender.stats.defense,
+    ...pickStats(attacker.stats, defender.stats, info.damageClass),
     movePower: info.power,
     moveType: info.type,
     attackerTypes: attacker.types,
     defenderTypes: defender.types,
     rng,
   });
-
   const wounded = { ...defender, hp: Math.max(0, defender.hp - hit.damage) };
   const verdict =
     hit.effectiveness > 1 ? ' Super effective!' : hit.effectiveness < 1 ? ' Not very effective…' : '';
@@ -114,10 +114,6 @@ function attack(side: BattleSideName, attacker: BattleSide, defender: BattleSide
   return { attacker: used, defender: wounded, events };
 }
 
-/**
- * One player action plus the opponent's reply. Pure, with an injected RNG, so a whole
- * battle can be replayed exactly in a test.
- */
 export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng): { state: BattleState; events: BattleEvent[] } {
   if (state.outcome !== 'ongoing') return { state, events: [] };
 
@@ -126,12 +122,17 @@ export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng):
   let foe = state.foe;
   let outcome: BattleOutcome = 'ongoing';
 
-  // Rejected up front: an unavailable move costs the player nothing, not even the turn.
   if (action.kind === 'move') {
     const chosen = player.moves.find((entry) => entry.name === action.move);
     if (!chosen || chosen.pp <= 0) {
       return { state, events: [{ kind: 'nopp', text: `${action.move} has no PP left.` }] };
     }
+  }
+
+  // A potion at full HP would heal nothing, so it is refused here rather than silently wasted. Returning before
+  // the turn loop means it costs the player no turn, exactly like the unavailable-move rule above.
+  if (action.kind === 'item' && player.hp >= player.maxHp) {
+    return { state, events: [{ kind: 'item', consumed: false, text: `${player.name} is already at full HP.` }] };
   }
 
   if (action.kind === 'run') {
@@ -149,16 +150,16 @@ export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng):
     if (attempt.caught) {
       return {
         state: { ...state, turn: state.turn + 1, outcome: 'caught' },
-        events: [{ kind: 'ball', text: `Gotcha! ${foe.name} was caught!` }],
+        events: [{ kind: 'ball', consumed: true, text: `Gotcha! ${foe.name} was caught!` }],
       };
     }
-    events.push({ kind: 'ball', text: `${foe.name} broke free (${Math.round(attempt.chance * 100)}% chance).` });
+    events.push({ kind: 'ball', consumed: true, text: `${foe.name} broke free (${Math.round(attempt.chance * 100)}% chance).` });
   }
 
   if (action.kind === 'item') {
     const healed = Math.min(POTION_HEAL, player.maxHp - player.hp);
     player = { ...player, hp: player.hp + healed };
-    events.push({ kind: 'item', text: `${player.name} recovered ${healed} HP.` });
+    events.push({ kind: 'item', consumed: true, text: `${player.name} recovered ${healed} HP.` });
   }
 
   if (action.kind === 'switch') {
@@ -194,6 +195,9 @@ export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng):
 
 export const foeCaptureChance = (foe: BattleSide, ball: BallName): number =>
   catchChance({ captureRate: foe.captureRate, hp: foe.hp, maxHp: foe.maxHp, ballBonus: BALL_BONUS[ball] });
+
+/** True when the resolved turn actually used the item, so the caller knows whether to spend it from the bag. */
+export const consumedFrom = (events: readonly BattleEvent[]): boolean => events.some((event) => event.consumed === true);
 
 export const previewEffectiveness = (move: string, defenderTypes: readonly string[]): number =>
   effectiveness(MOVES[move]?.type ?? 'normal', defenderTypes);

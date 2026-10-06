@@ -10,12 +10,14 @@ import type { WildEncounter } from '../logic/rollWild';
 interface EncounterSheetProps {
   wild: WildEncounter;
   balls: number;
+  notice?: string;
   onBattle: () => void;
+  onThrowBall: () => void;
   onRun: () => void;
 }
 
 /** Shown over the map so the player never loses the sense of where they were. */
-export function EncounterSheet({ wild, balls, onBattle, onRun }: EncounterSheetProps) {
+export function EncounterSheet({ wild, balls, notice, onBattle, onThrowBall, onRun }: EncounterSheetProps) {
   const entry = getEntry(wild.id);
   if (!entry) return null;
 
@@ -45,18 +47,32 @@ export function EncounterSheet({ wild, balls, onBattle, onRun }: EncounterSheetP
         </Pressable>
 
         <View style={styles.secondaryRow}>
-          <View style={[styles.ghost, styles.disabled]}>
-            <Text style={styles.ghostLabel}>THROW BALL</Text>
-            <Text style={styles.ghostHint}>{balls > 0 ? `${balls} LEFT · IN BATTLE` : 'NONE LEFT'}</Text>
-          </View>
+          {balls > 0 ? (
+            <Pressable
+              style={styles.ghost}
+              onPress={onThrowBall}
+              accessibilityRole="button"
+              accessibilityLabel={`Throw a ball at ${titleCase(entry.name)}`}
+            >
+              <Text style={styles.ghostLabel}>THROW BALL</Text>
+              <Text style={styles.ghostHint}>{balls} LEFT · FULL HP ODDS</Text>
+            </Pressable>
+          ) : (
+            <View style={[styles.ghost, styles.disabled]}>
+              <Text style={styles.ghostLabel}>THROW BALL</Text>
+              <Text style={styles.ghostHint}>NONE LEFT</Text>
+            </View>
+          )}
           <Pressable style={styles.ghost} onPress={onRun} accessibilityRole="button">
             <Text style={styles.ghostLabel}>RUN AWAY</Text>
             <Text style={styles.ghostHint}>80% AGAINST WILD</Text>
           </Pressable>
         </View>
 
+        {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+
         <Text style={styles.note}>
-          Ball throws resolve inside the battle, where the remaining HP of the wild Pokémon sets the odds.
+          Throwing here always uses the wild&apos;s full HP, so the odds are worse than weakening it in battle first.
         </Text>
       </View>
     </View>
@@ -108,5 +124,6 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.5 },
   ghostLabel: { color: colors.text, fontFamily: font.mono, fontSize: 10, letterSpacing: 1.2 },
   ghostHint: { color: colors.textFaint, fontFamily: font.mono, fontSize: 8, marginTop: 4, letterSpacing: 0.8 },
+  notice: { color: colors.warn, fontFamily: font.mono, fontSize: 9.5, letterSpacing: 0.8, textAlign: 'center' },
   note: { color: colors.textFaint, fontSize: 11, lineHeight: 16 },
 });

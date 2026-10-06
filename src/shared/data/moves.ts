@@ -25,3 +25,26 @@ export const moveInfo = (name: string): MoveInfo | undefined => (name === STRUGG
 export const isDamaging = (name: string): boolean => (moveInfo(name)?.power ?? 0) > 0;
 
 export const hasDamagingMove = (names: readonly string[]): boolean => names.some(isDamaging);
+
+/** A move the party carries, with the PP it has left. This is persisted, so the shape is part of the save format. */
+export interface MoveSlot {
+  name: string;
+  pp: number;
+}
+
+const MAX_PP_FALLBACK = 10;
+
+/** Struggle is not in the seed and reports no PP, so it falls back like any other unknown move. */
+export const maxPpOf = (name: string): number => {
+  const pp = moveInfo(name)?.pp ?? 0;
+  return pp > 0 ? pp : MAX_PP_FALLBACK;
+};
+
+export const toSlots = (names: readonly string[]): MoveSlot[] => names.map((name) => ({ name, pp: maxPpOf(name) }));
+
+/** Refills every move. Used by the two recovery paths (level up, defeat) so a run can never dead-end. */
+export const fullPp = (slots: readonly MoveSlot[]): MoveSlot[] => slots.map((slot) => ({ ...slot, pp: maxPpOf(slot.name) }));
+
+/** Guarantees the slots contain something that can actually deal damage. */
+export const withUsableMove = (slots: readonly MoveSlot[]): MoveSlot[] =>
+  hasDamagingMove(slots.map((slot) => slot.name)) ? [...slots] : [...slots, { name: STRUGGLE, pp: maxPpOf(STRUGGLE) }];
