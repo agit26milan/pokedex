@@ -63,11 +63,13 @@ rather than a unit test.
       player into an unwinnable battle. Unit tests for both directions.
       _Implemented once in `shared/data/moves.ts` and applied on both sides (`createSide` for the player, `damagingMoves`
       for the opponent); tested in both directions._
-- [ ] 6.7 `logic/levelUp.ts` — XP reward, thresholds and automatic move learning (the second half of task 6.3).
+- [x] 6.7 `logic/levelUp.ts` — XP reward, thresholds and automatic move learning (the second half of task 6.3).
 - [x] 6.2 `logic/turnEngine.ts` (`resolveTurn(state, action, rng) -> {state, events}`) with unit tests: turn order by
       speed, accuracy miss, PP exhaustion rejection, switch-in consumes turn.
-- [ ] 6.3 `logic/catchRate.ts` + `logic/levelUp.ts` (XP thresholds, automatic move learning) with unit tests, including
+- [x] 6.3 `logic/catchRate.ts` + `logic/levelUp.ts` (XP thresholds, automatic move learning) with unit tests, including
       party-full storage path and no-balls path.
+      _Catch odds and level curve done; the storage path is covered by `placeInRoster` (task 5.3) and the no-balls path by
+      the battle slice wiring in task 6.4._
 - [ ] 6.4 `ui/BattleView.tsx` + `ui/MoveGrid.tsx` + `ui/HpBar.tsx` + `ui/PartySwitch.tsx` + bag/run actions, driven only by
       engine events. `[E2E]` full battle to a catch on a device.
 - [ ] 6.5 `ui/EncounterSheet.tsx` bottom sheet (Battle / Throw Ball / Run Away) with haptics and spring-in.

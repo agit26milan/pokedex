@@ -23,6 +23,7 @@ export interface PartySlice {
   choosePartner: (id: number) => void;
   addCaught: (member: PartyMember) => void;
   swapLeader: (id: number) => void;
+  updateMember: (index: number, member: PartyMember) => void;
   setMemberHp: (index: number, hp: number) => void;
   healParty: (fraction?: number) => void;
   spendItem: (item: BagItem) => boolean;
@@ -73,6 +74,10 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
 
   swapLeader: (id) => {
     if (get().party.some((member) => member.id === id)) set({ leaderId: id });
+  },
+
+  updateMember: (index, member) => {
+    set({ party: get().party.map((current, i) => (i === index ? member : current)) });
   },
 
   setMemberHp: (index, hp) => {
