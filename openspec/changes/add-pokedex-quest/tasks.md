@@ -119,8 +119,9 @@ rather than a unit test.
       succeeded (BUILD SUCCESSFUL in 37m32s, 559 tasks)._
 - [x] 9.3 Produce a real APK and record its path; verify it launches on a device or emulator. `[E2E]` install and run with
       Metro stopped and the network off.
-      _`dist/pokedex-quest-1.0.0-universal.apk` (103 MB, 4 ABIs, sha256 bce8bd7a…). Statically verified with
-      `aapt2 dump badging` (package/label/activity/targetSdk) and `unzip -l` (bundle + dex + .so present). The
+      _`dist/pokedex-quest-1.0.0-universal.apk` (103 MB, 4 ABIs) and `dist/pokedex-quest-1.0.0-arm64.apk`
+      (41 MB, arm64-v8a only, built in 1m11s from the warm Gradle cache). Both statically verified with
+      `aapt2 dump badging` (package/label/activity/targetSdk/ABIs) and `unzip -l` (bundle + dex + .so present). The
       install-and-launch half is NOT done — no device or emulator exists on this machine; tracked as task 9.7._
 - [ ] 9.7 Install the produced APK on a real device (or create an emulator with a system image) and confirm it launches
       with Metro stopped: the tour, haptics and sprite loading on a device remain unverified until this is done.

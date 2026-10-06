@@ -66,11 +66,12 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 
 | Artifact | Details |
 | --- | --- |
-| `dist/pokedex-quest-1.0.0-universal.apk` | 103 MB, all four ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) |
+| `dist/pokedex-quest-1.0.0-universal.apk` | 103 MB, all four ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) — safest for an unknown device or an emulator |
+| `dist/pokedex-quest-1.0.0-arm64.apk` | 41 MB, `arm64-v8a` only — the one to hand a reviewer with a modern phone |
 | Package | `com.agitafirstawan.pokedexquest`, versionCode 1, versionName 1.0.0, targetSdk 36 |
 | Label / activity | `Pokédex Quest` / `.MainActivity` |
-| Self-contained | `assets/index.android.bundle` (3.2 MB) is embedded, so it runs with Metro stopped and no network |
-| SHA-256 | `bce8bd7a12ebca9133284061109b21c906bc7d36390e3de1ad04e792dc930380` |
+| Self-contained | `assets/index.android.bundle` (3.2 MB) is embedded in both, so they run with Metro stopped and no network |
+| SHA-256 | universal `bce8bd7a12ebca9133284061109b21c906bc7d36390e3de1ad04e792dc930380`, arm64 `1defd27ca0cf94937b04afc6bcd65f9247762cabe9f2a5ced84dde9c5018005a` |
 
 Verified by inspecting the produced file (`aapt2 dump badging`, `unzip -l`), not by assuming the build
 succeeded. It was **not** launched on a device — see Known limitations.
