@@ -2,13 +2,14 @@ import { fireEvent, render } from '@testing-library/react-native';
 
 import { createMember } from '@/features/party/store/partySlice';
 import { useStore } from '@/store';
+import GlossaryScreen from './glossary';
 
 const mockPush = jest.fn();
 
+// babel-plugin-jest-hoist lifts these above the imports at runtime; the arrow only reads mockPush
+// when useRouter is called during render, so the source order is honest.
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('@/shared/components/Sprite', () => ({ Sprite: () => null }));
-
-import GlossaryScreen from './glossary';
 
 const reset = () =>
   useStore.setState({ query: '', typeFilters: [], party: [], storage: [], leaderId: null });

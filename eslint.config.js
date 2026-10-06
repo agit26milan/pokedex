@@ -4,7 +4,7 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['android/**', 'ios/**', 'dist/**', 'design/**', 'node_modules/**'],
+    ignores: ['android/**', 'ios/**', 'dist/**', 'design/**', 'node_modules/**', '.expo/**'],
   },
   {
     // Pinned instead of 'detect': eslint-plugin-react's detector crashes on the
