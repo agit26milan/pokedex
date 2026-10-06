@@ -13,6 +13,8 @@ export interface WorldSlice {
   stepInto: (tile: TileType) => void;
   markEncounterResolved: () => void;
   setPendingEncounter: (tile: TileType | null) => void;
+  setEncounterRisk: (risk: number) => void;
+  markFirstEncounterDone: () => void;
 }
 
 export const DEFAULT_WORLD_SEED = 1_013_1987;
@@ -40,4 +42,8 @@ export const createWorldSlice: StateCreator<WorldSlice, [], [], WorldSlice> = (s
   markEncounterResolved: () => set({ encounterRisk: 0, pendingEncounter: null }),
 
   setPendingEncounter: (tile) => set({ pendingEncounter: tile }),
+
+  setEncounterRisk: (risk) => set({ encounterRisk: Math.max(0, Math.min(1, risk)) }),
+
+  markFirstEncounterDone: () => set({ firstEncounterDone: true }),
 });

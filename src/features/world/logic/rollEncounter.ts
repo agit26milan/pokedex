@@ -25,8 +25,3 @@ export function rollEncounter({ rng, tile, firstEncounterDone }: EncounterInput)
 
   return { encounter: rollChance(rng, ENCOUNTER_RATE), firstEncounterDone };
 }
-
-export function wildLevelFor(partnerLevel: number, rng: Rng): number {
-  const base = Math.max(2, partnerLevel - 2);
-  return base + Math.floor(rng() * 4);
-}

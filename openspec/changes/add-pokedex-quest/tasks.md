@@ -45,10 +45,13 @@ rather than a unit test.
 - [x] 5.1 `logic/generateChunk.ts` (seeded chunk generation) + `logic/movePlayer.ts` (blocked tiles, adjacency) with unit
       tests: determinism, blocked movement, adjacency rule.
 - [x] 5.2 `logic/rollEncounter.ts` (18% rate, guaranteed first encounter) with unit tests using seeded RNG.
-- [ ] 5.3 Partner picker screen + `logic/partyRules.ts` (party max 6, storage overflow) with unit tests.
-- [ ] 5.4 `ui/WorldGrid.tsx` + `ui/Tile.tsx` rendering the chunk with reachable-tile rings, rustle on tall grass and the
+- [x] 5.3 Partner picker screen + `logic/partyRules.ts` (party max 6, storage overflow) with unit tests.
+- [x] 5.4 `ui/WorldGrid.tsx` + `ui/Tile.tsx` rendering the chunk with reachable-tile rings, rustle on tall grass and the
       risk meter; Reanimated movement so tiles do not re-render. `[E2E]` walking feels responsive on a device.
-- [ ] 5.5 `ui/Stick.tsx` joystick + tap-to-step + long-press sprint + haptics on step/encounter.
+      _Camera translation is a Reanimated shared value, tiles are memo + stable keys. On-device feel still pending._
+- [x] 5.5 `ui/Stick.tsx` joystick + tap-to-step + long-press sprint + haptics on step/encounter.
+      _Shipped as `ui/Dpad.tsx`: hold-to-repeat D-pad plus a sprint toggle, tap-to-step on the glowing tiles, and haptics
+      on step, blocked step and encounter. Deviation and reasoning are recorded in design.md._
 
 ## 6. Battle
 

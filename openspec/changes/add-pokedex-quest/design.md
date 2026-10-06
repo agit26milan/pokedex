@@ -123,6 +123,10 @@ Additional rules:
 - `react-hooks/exhaustive-deps` is an error and must not be silenced without a written reason.
 - Every memoization has to be justified by a render-propagation path; blanket `memo`/`useMemo` is treated as a defect.
 
+**Deviation from the draft:** a hold-to-repeat D-pad replaced the sketched analog stick. Grid movement is discrete, so a
+discrete control has fewer moving parts, works with screen readers, and removes drag-versus-tap ambiguity. Reanimated
+still owns the camera translation, so a step animates on the UI thread and does not re-render the 400 tiles.
+
 ## Decisions locked (from explore)
 
 | ID | Decision | Why |
