@@ -38,6 +38,11 @@ until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1"
 done
 echo "==> booted after ${waited}s"
 
+# AVD state survives between runs, so clear airplane mode instead of assuming network is up.
+adb shell settings put global airplane_mode_on 0
+adb shell svc wifi enable >/dev/null 2>&1
+adb shell svc data enable >/dev/null 2>&1
+
 echo "==> installing $APK"
 adb install -r "$APK"
 
