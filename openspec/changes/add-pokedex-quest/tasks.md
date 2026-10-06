@@ -103,7 +103,11 @@ rather than a unit test.
 - [ ] 8.2 `[E2E]` Two-minute tour on a real device via Expo Go QR: partner → tall grass → encounter → win → catch → Glossary
       shows the caught mark.
 - [ ] 8.3 `[E2E]` Airplane mode run: world, battle, list, search, filter and detail all still work.
-- [ ] 8.4 Sanity-check non-goals are still non-goals (no trainer battle, no status effect, no native module added).
+- [x] 8.4 Sanity-check non-goals are still non-goals (no trainer battle, no status effect, no native module added).
+      _Checked rather than assumed: `grep -riE "trainer"` and a burn/paralyze/sleep-status grep both return nothing, and
+      every native dependency resolves inside Expo Go's `bundledNativeModules.json` at the installed version
+      (async-storage 2.2.0, reanimated 4.5.1, safe-area-context ~5.7.0, screens ~4.26.0, worklets 0.10.1) with zero
+      custom modules. `npx expo-doctor` reports 21/21 after removing the stale `newArchEnabled` flag._
 
 ## 9. Build and distribution (APK + iOS/IPA path)
 
