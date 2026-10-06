@@ -55,13 +55,16 @@ rather than a unit test.
 
 ## 6. Battle
 
-- [ ] 6.1 `logic/damage.ts` (formula, STAB, 18-type chart, crit) with unit tests for super/not-very effective, crit and
+- [x] 6.1 `logic/damage.ts` (formula, STAB, 18-type chart, crit) with unit tests for super/not-very effective, crit and
       minimum damage. _Chart must be the modern 18-type table: Gen-1 species typing in the seed already includes fairy
       and steel (e.g. Clefairy, Magnemite), so a 15-type chart would silently mis-resolve those matchups._
-- [ ] 6.6 Handle Pokémon whose Red-Blue learnset has no damaging move (metapod, kakuna, abra, ditto — found in the seed):
+- [x] 6.6 Handle Pokémon whose Red-Blue learnset has no damaging move (metapod, kakuna, abra, ditto — found in the seed):
       engine grants a fallback Struggle-style move so a wild one can still fight and a caught one can never soft-lock the
       player into an unwinnable battle. Unit tests for both directions.
-- [ ] 6.2 `logic/turnEngine.ts` (`resolveTurn(state, action, rng) -> {state, events}`) with unit tests: turn order by
+      _Implemented once in `shared/data/moves.ts` and applied on both sides (`createSide` for the player, `damagingMoves`
+      for the opponent); tested in both directions._
+- [ ] 6.7 `logic/levelUp.ts` — XP reward, thresholds and automatic move learning (the second half of task 6.3).
+- [x] 6.2 `logic/turnEngine.ts` (`resolveTurn(state, action, rng) -> {state, events}`) with unit tests: turn order by
       speed, accuracy miss, PP exhaustion rejection, switch-in consumes turn.
 - [ ] 6.3 `logic/catchRate.ts` + `logic/levelUp.ts` (XP thresholds, automatic move learning) with unit tests, including
       party-full storage path and no-balls path.
