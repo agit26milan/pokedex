@@ -15,4 +15,9 @@ module.exports = defineConfig([
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
+  {
+    // Last so it wins: build tooling reports progress on stdout by design.
+    files: ['scripts/**/*.ts'],
+    rules: { 'no-console': 'off' },
+  },
 ]);

@@ -5,12 +5,13 @@ rather than a unit test.
 
 ## 1. Project scaffold
 
-- [ ] 1.1 `npx create-expo-app pokemon --template blank-typescript` in this repo, add expo-router, zustand, axios,
+- [x] 1.1 `npx create-expo-app pokemon --template blank-typescript` in this repo, add expo-router, zustand, axios,
       expo-image, expo-haptics, and TypeScript strict. Commit the untouched baseline.
-- [ ] 1.2 Configure ESLint (`eslint-config-expo` + react-hooks rules as errors) and Prettier; add `npm run lint`,
+- [x] 1.2 Configure ESLint (`eslint-config-expo` + react-hooks rules as errors) and Prettier; add `npm run lint`,
       `npm run typecheck`, `npm test`.
 - [ ] 1.3 Build the folder skeleton from design.md (`app/`, `src/features/*`, `src/shared/*`) with empty modules and
       the two-tab layout so routing works end to end. `[E2E]` both tabs open on a device.
+      _Skeleton + tabs built; verified by a real Metro bundle export (android, 2.7 MB .hbc). On-device check still pending._
 
 ## 2. Data seed
 
