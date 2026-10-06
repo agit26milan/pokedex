@@ -35,8 +35,10 @@ rather than a unit test.
 - [x] 4.1 `logic/filterPokemon.ts` (search + multi-type filter, pure) with unit tests for search, filter, intersection, empty result.
 - [x] 4.2 `ui/PokemonList.tsx` + `ui/PokemonRow.tsx` + `ui/SearchBar.tsx` + `ui/TypeFilter.tsx` wired to the store;
       FlatList tuning from design.md; memoization only where props are primitive.
-- [ ] 4.3 `(glossary)/[id].tsx` detail from seed, then axios enrichment + AsyncStorage cache with TTL and silent fallback.
-      `[E2E]` open detail with airplane mode on.
+- [x] 4.3 `(glossary)/[id].tsx` detail from seed, then axios enrichment + AsyncStorage cache with TTL and silent fallback.
+      `[E2E]` open detail with airplane mode on. _Route is `app/pokemon/[id].tsx` (root Stack, pushed from the list).
+      Verified: typecheck/lint/tests green and the screen renders from seed before the request resolves. The airplane-mode
+      pass on a physical device is still pending (task 8.3)._
 
 ## 5. World / Play
 

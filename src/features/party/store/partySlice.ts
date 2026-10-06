@@ -2,24 +2,18 @@ import type { StateCreator } from 'zustand';
 
 import { maxHpFor } from '@/features/battle/logic/stats';
 import { getEntry, movesetFor } from '@/shared/data/dex';
+import { placeInRoster } from '../logic/partyRules';
+import {
+  INITIAL_BAG,
+  STARTER_IDS,
+  STARTER_LEVEL,
+  type Bag,
+  type BagItem,
+  type PartyMember,
+} from '../types';
 
-export interface PartyMember {
-  id: number;
-  name: string;
-  level: number;
-  xp: number;
-  hp: number;
-  maxHp: number;
-  moves: string[];
-}
-
-export interface Bag {
-  pokeBall: number;
-  greatBall: number;
-  potion: number;
-}
-
-export type BagItem = keyof Bag;
+export type { Bag, BagItem, PartyMember } from '../types';
+export { INITIAL_BAG, PARTY_LIMIT, STARTER_IDS, STARTER_LEVEL } from '../types';
 
 export interface PartySlice {
   party: PartyMember[];
@@ -34,11 +28,6 @@ export interface PartySlice {
   spendItem: (item: BagItem) => boolean;
   grantItem: (item: BagItem, amount: number) => void;
 }
-
-export const PARTY_LIMIT = 6;
-export const STARTER_IDS = [1, 4, 7] as const;
-export const STARTER_LEVEL = 5;
-export const INITIAL_BAG: Bag = { pokeBall: 10, greatBall: 2, potion: 3 };
 
 export function createMember(id: number, level: number): PartyMember | undefined {
   const entry = getEntry(id);
@@ -73,13 +62,13 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
   },
 
   addCaught: (member) => {
-    const { party, storage } = get();
-    // The seventh catch goes to storage but still counts as caught in the Glossary.
-    if (party.length < PARTY_LIMIT) {
-      set({ party: [...party, member], leaderId: get().leaderId ?? member.id });
-      return;
-    }
-    set({ storage: [...storage, member] });
+    const { party, storage, leaderId } = get();
+    const change = placeInRoster(party, storage, member);
+    set({
+      party: change.party,
+      storage: change.storage,
+      leaderId: leaderId ?? member.id,
+    });
   },
 
   swapLeader: (id) => {
@@ -87,10 +76,11 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
   },
 
   setMemberHp: (index, hp) => {
-    const party = get().party.map((member, i) =>
-      i === index ? { ...member, hp: Math.max(0, Math.min(member.maxHp, hp)) } : member,
-    );
-    set({ party });
+    set({
+      party: get().party.map((member, i) =>
+        i === index ? { ...member, hp: Math.max(0, Math.min(member.maxHp, hp)) } : member,
+      ),
+    });
   },
 
   healParty: (fraction = 1) => {
