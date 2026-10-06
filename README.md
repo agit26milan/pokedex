@@ -56,6 +56,25 @@ cd android && ./gradlew assembleRelease
 `sudo`. `eas.json` also carries `development` / `simulator` / `preview` (APK) / `production`
 profiles for EAS cloud builds.
 
+Leaner build for real phones (arm64 only, drops the emulator ABIs):
+
+```bash
+cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
+```
+
+### What was actually built
+
+| Artifact | Details |
+| --- | --- |
+| `dist/pokedex-quest-1.0.0-universal.apk` | 103 MB, all four ABIs (`arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`) |
+| Package | `com.agitafirstawan.pokedexquest`, versionCode 1, versionName 1.0.0, targetSdk 36 |
+| Label / activity | `Pokédex Quest` / `.MainActivity` |
+| Self-contained | `assets/index.android.bundle` (3.2 MB) is embedded, so it runs with Metro stopped and no network |
+| SHA-256 | `bce8bd7a12ebca9133284061109b21c906bc7d36390e3de1ad04e792dc930380` |
+
+Verified by inspecting the produced file (`aapt2 dump badging`, `unzip -l`), not by assuming the build
+succeeded. It was **not** launched on a device — see Known limitations.
+
 ## Layout
 
 ```

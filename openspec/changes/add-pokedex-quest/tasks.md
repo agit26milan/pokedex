@@ -86,15 +86,20 @@ rather than a unit test.
 - [x] 7.2 Defensive reload path: invalid persisted state falls back to a fresh run instead of crashing. Unit tests for both.
       _`isValidRun` + `mergePersisted` in src/store/index.ts, wired as persist `merge`, tested against eight malformed
       payloads plus a never-throws loop._
-- [ ] 7.3 Performance pass with evidence: record render counts for a step and a list scroll, confirm tiles are not
+- [x] 7.3 Performance pass with evidence: record render counts for a step and a list scroll, confirm tiles are not
       re-rendered and memo/useCallback/useMemo are only where design.md says. Fix or remove anything unjustified.
+      _Evidence shipped as `src/features/pokedex/ui/PokemonRow.test.tsx`: a render-count test that proves a parent
+      re-render does not re-render rows when the callback is stable, and does when it is not. `useMemo` survives in two
+      places only (the 151-entry filter and the caught-id Set). What this environment cannot do is on-device render
+      profiling, so the Flipper/Reanimated timeline numbers the design asked for are recorded as pending, not claimed._
 - [x] 7.4 README: setup, QR instructions, 2-minute tour script, architecture map, performance notes, phase-2 backlog.
       _README.md covers all six, plus the build commands and a Known limitations section that lists the checks this
       environment could not run._
 
 ## 8. Verification
 
-- [ ] 8.1 `npm run typecheck && npm run lint && npm test` green; note the real test count (no claimed coverage numbers).
+- [x] 8.1 `npm run typecheck && npm run lint && npm test` green; note the real test count (no claimed coverage numbers).
+      _typecheck 0, lint 0, 137 tests across 17 suites — the count is read from the Jest summary, not estimated._
 - [ ] 8.2 `[E2E]` Two-minute tour on a real device via Expo Go QR: partner → tall grass → encounter → win → catch → Glossary
       shows the caught mark.
 - [ ] 8.3 `[E2E]` Airplane mode run: world, battle, list, search, filter and detail all still work.
@@ -102,18 +107,33 @@ rather than a unit test.
 
 ## 9. Build and distribution (APK + iOS/IPA path)
 
-- [ ] 9.1 Add `eas.json` with `development`, `simulator`, `preview` (Android APK) and `production` profiles; add
+- [x] 9.1 Add `eas.json` with `development`, `simulator`, `preview` (Android APK) and `production` profiles; add
       `npm run android:apk` / `npm run ios:build` scripts that call the documented commands.
-- [ ] 9.2 Decide the APK route with evidence: try EAS cloud build (`eas build -p android --profile preview`) and, if no
+      _`eas.json` has all four profiles; package.json carries `android:apk` (EAS) and `android:apk:local`
+      (prebuild + gradlew), plus `ios:sim` and `ios:ipa`._
+- [x] 9.2 Decide the APK route with evidence: try EAS cloud build (`eas build -p android --profile preview`) and, if no
       Expo login is available, install the local toolchain (Android cmdline-tools + platform/build-tools + JDK 17) and
       use `npx expo prebuild -p android && ./gradlew assembleRelease`.
-- [ ] 9.3 Produce a real APK and record its path; verify it launches on a device or emulator. `[E2E]` install and run with
+      _EAS needs an Expo login that is not available here, so the local route was used: `scripts/setup-local-android.sh`
+      installed JDK 17.0.20.1 + the Android SDK without sudo, then `expo prebuild` + `./gradlew assembleRelease`
+      succeeded (BUILD SUCCESSFUL in 37m32s, 559 tasks)._
+- [x] 9.3 Produce a real APK and record its path; verify it launches on a device or emulator. `[E2E]` install and run with
       Metro stopped and the network off.
-- [ ] 9.4 Prepare the iOS path: verify `eas.json` profiles are valid, document the exact IPA command and the required
+      _`dist/pokedex-quest-1.0.0-universal.apk` (103 MB, 4 ABIs, sha256 bce8bd7a…). Statically verified with
+      `aapt2 dump badging` (package/label/activity/targetSdk) and `unzip -l` (bundle + dex + .so present). The
+      install-and-launch half is NOT done — no device or emulator exists on this machine; tracked as task 9.7._
+- [ ] 9.7 Install the produced APK on a real device (or create an emulator with a system image) and confirm it launches
+      with Metro stopped: the tour, haptics and sprite loading on a device remain unverified until this is done.
+- [x] 9.4 Prepare the iOS path: verify `eas.json` profiles are valid, document the exact IPA command and the required
       Apple credentials. If Xcode and/or an Apple Developer account are absent, record that plainly in the README
       instead of claiming an IPA exists.
-- [ ] 9.5 Gitignore `android/`, `ios/`, keystores, provisioning profiles and `*.jks`; confirm no credential is committed.
-- [ ] 9.6 README build section: prerequisites, the exact commands, what is verified, what is blocked and why.
+      _Documented in the README: `npm run ios:ipa` with an Apple Developer account and provisioning profile; this machine
+      has neither Xcode nor a paid account, so no IPA is claimed._
+- [x] 9.5 Gitignore `android/`, `ios/`, keystores, provisioning profiles and `*.jks`; confirm no credential is committed.
+      _Verified with `git check-ignore` and by grepping the tree for keystores/credentials._
+- [x] 9.6 README build section: prerequisites, the exact commands, what is verified, what is blocked and why.
+      _README has the prerequisites, both build routes, the produced-artifact table with hashes, and a Known limitations
+      section naming what is blocked (device E2E, iOS IPA) and why._
 
 ## Phase 2 (explicitly NOT in this change)
 
