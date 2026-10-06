@@ -15,7 +15,7 @@ rather than a unit test.
 
 ## 2. Data seed
 
-- [ ] 2.1 Write `scripts/genSeed.ts`: fetch species + pokemon + move learnsets for ids 1-151 from PokéAPI, emit
+- [x] 2.1 Write `scripts/genSeed.ts`: fetch species + pokemon + move learnsets for ids 1-151 from PokéAPI, emit
       `src/shared/data/pokedex.gen1.json` (id, name, types, baseStats, evolution, 4 legal moves with power/accuracy/pp/class).
 - [ ] 2.2 Run it, commit the seed, and add a test asserting all 151 entries exist with valid types and at least one
       damaging move each.
@@ -37,9 +37,9 @@ rather than a unit test.
 
 ## 5. World / Play
 
-- [ ] 5.1 `logic/generateChunk.ts` (seeded chunk generation) + `logic/movePlayer.ts` (blocked tiles, adjacency) with unit
+- [x] 5.1 `logic/generateChunk.ts` (seeded chunk generation) + `logic/movePlayer.ts` (blocked tiles, adjacency) with unit
       tests: determinism, blocked movement, adjacency rule.
-- [ ] 5.2 `logic/rollEncounter.ts` (18% rate, guaranteed first encounter) with unit tests using seeded RNG.
+- [x] 5.2 `logic/rollEncounter.ts` (18% rate, guaranteed first encounter) with unit tests using seeded RNG.
 - [ ] 5.3 Partner picker screen + `logic/partyRules.ts` (party max 6, storage overflow) with unit tests.
 - [ ] 5.4 `ui/WorldGrid.tsx` + `ui/Tile.tsx` rendering the chunk with reachable-tile rings, rustle on tall grass and the
       risk meter; Reanimated movement so tiles do not re-render. `[E2E]` walking feels responsive on a device.
@@ -48,7 +48,11 @@ rather than a unit test.
 ## 6. Battle
 
 - [ ] 6.1 `logic/damage.ts` (formula, STAB, 18-type chart, crit) with unit tests for super/not-very effective, crit and
-      minimum damage.
+      minimum damage. _Chart must be the modern 18-type table: Gen-1 species typing in the seed already includes fairy
+      and steel (e.g. Clefairy, Magnemite), so a 15-type chart would silently mis-resolve those matchups._
+- [ ] 6.6 Handle Pokémon whose Red-Blue learnset has no damaging move (metapod, kakuna, abra, ditto — found in the seed):
+      engine grants a fallback Struggle-style move so a wild one can still fight and a caught one can never soft-lock the
+      player into an unwinnable battle. Unit tests for both directions.
 - [ ] 6.2 `logic/turnEngine.ts` (`resolveTurn(state, action, rng) -> {state, events}`) with unit tests: turn order by
       speed, accuracy miss, PP exhaustion rejection, switch-in consumes turn.
 - [ ] 6.3 `logic/catchRate.ts` + `logic/levelUp.ts` (XP thresholds, automatic move learning) with unit tests, including
