@@ -127,8 +127,13 @@ rather than a unit test.
       (41 MB, arm64-v8a only, built in 1m11s from the warm Gradle cache). Both statically verified with
       `aapt2 dump badging` (package/label/activity/targetSdk/ABIs) and `unzip -l` (bundle + dex + .so present). The
       install-and-launch half is NOT done — no device or emulator exists on this machine; tracked as task 9.7._
-- [ ] 9.7 Install the produced APK on a real device (or create an emulator with a system image) and confirm it launches
+- [x] 9.7 Install the produced APK on a real device (or create an emulator with a system image) and confirm it launches
       with Metro stopped: the tour, haptics and sprite loading on a device remain unverified until this is done.
+      _Done on an Android 36 arm64 emulator (created via `scripts/emulator-e2e.sh`, also `npm run e2e:android`):
+      `adb install` → **Success**, launched with Metro stopped and the network off, and the captured screenshot shows the
+      real partner picker rendered — "STEP 1 OF 2 / Choose your partner", Bulbasaur/Charmander/Squirtle cards with
+      sprites, type badges and HP/ATK/SPD, the disabled "Pick a partner to continue" CTA and both tabs. No crash and no
+      red-box in logcat. Screenshot: `~/Desktop/PokedexQuest-emulator-launch.png`._
 - [x] 9.4 Prepare the iOS path: verify `eas.json` profiles are valid, document the exact IPA command and the required
       Apple credentials. If Xcode and/or an Apple Developer account are absent, record that plainly in the README
       instead of claiming an IPA exists.
