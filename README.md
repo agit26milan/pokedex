@@ -71,7 +71,7 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 | Package | `com.agitafirstawan.pokedexquest`, versionCode 1, versionName 1.0.0, targetSdk 36 |
 | Label / activity | `Pokédex Quest` / `.MainActivity` |
 | Self-contained | `assets/index.android.bundle` (3.2 MB) is embedded in both, so they run with Metro stopped and no network |
-| SHA-256 | universal `fff057f092d3ca73522af7d9b7b69c67713fd2ecd4eb83004e60e269ab6f3e72`, arm64 `aea8ffba01b395c461657da71d46d60d7280698d05f029bdeda2b3ddd0d14b75` |
+| SHA-256 | universal `99528ad4de9e574cc22d357000125b6d5165a6e6b36c5e899bd992f369347003`, arm64 `1ad02fd03c852f1a847b9517c272173717a19f519a6e789521397b89bc41de7e` |
 
 Verified by inspecting the produced file (`aapt2 dump badging`, `unzip -l`), not by assuming the build
 succeeded, and launched on an emulator (see task 9.7 in the OpenSpec change). Test files live under
