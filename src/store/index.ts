@@ -54,6 +54,8 @@ export const useStore = create<RunState>()(
 export const useRunSelectorShallow = <T>(selector: (state: RunState) => T): T => useStore(useShallow(selector));
 
 /** Caught = in the party or in storage. Derived, never stored twice. */
-export function caughtIdsOf(state: RunState): number[] {
-  return [...new Set([...state.party, ...state.storage].map((member) => member.id))];
+export function caughtIdsFrom(party: readonly { id: number }[], storage: readonly { id: number }[]): number[] {
+  return [...new Set([...party, ...storage].map((member) => member.id))];
 }
+
+export const caughtIdsOf = (state: RunState): number[] => caughtIdsFrom(state.party, state.storage);
