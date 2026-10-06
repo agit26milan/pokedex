@@ -5,7 +5,6 @@ import { createMember } from '@/features/party/store/partySlice';
 import { maxPpOf } from '@/shared/data/moves';
 import { createRunStore } from './index';
 
-/** A member that has already spent some PP, the way a real save would look mid-run. */
 const drained = () => {
   const member = createMember(25, 12)!;
   return {
@@ -29,7 +28,7 @@ describe('PP persists across battles', () => {
   it('keeps the spent PP on the member itself, not just in the battle', () => {
     const member = drained();
     const side = createSide(25, 12)!;
-    expect(side.moves[0]!.pp).toBe(side.moves[0]!.maxPp); // a wild is always fresh
+    expect(side.moves[0]!.pp).toBe(side.moves[0]!.maxPp);
     expect(member.moves[0]!.pp).toBe(2);
   });
 

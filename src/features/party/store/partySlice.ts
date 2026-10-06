@@ -94,7 +94,7 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
       party: get().party.map((member) => ({
         ...member,
         hp: Math.min(member.maxHp, Math.max(member.hp, Math.round(member.maxHp * fraction))),
-        // Losing heals the party and refills PP; together they are the floor that keeps a run playable.
+
         moves: fullPp(member.moves),
       })),
     });

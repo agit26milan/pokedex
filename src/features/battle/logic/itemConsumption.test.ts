@@ -5,8 +5,8 @@ import { consumedFrom, POTION_HEAL, resolveTurn, type BattleState } from './turn
 const fixed = (value: number): Rng => () => value;
 
 const battle = (playerHp?: number): BattleState => {
-  const player = createSide(1, 10)!; // bulbasaur
-  const foe = createSide(19, 8)!; // rattata
+  const player = createSide(1, 10)!;
+  const foe = createSide(19, 8)!;
   return { player: playerHp === undefined ? player : { ...player, hp: playerHp }, foe, turn: 0, outcome: 'ongoing' };
 };
 
@@ -47,7 +47,6 @@ describe('item consumption signal', () => {
     expect(consumedFrom(caught.events)).toBe(true);
     expect(caught.state.outcome).toBe('caught');
 
-    // Enough HP that the wild's answering attack cannot end the battle, so the assertion is about the ball.
     const failed = resolveTurn(battle(20), { kind: 'ball', ball: 'pokeBall' }, fixed(0.99));
     expect(consumedFrom(failed.events)).toBe(true);
     expect(failed.state.outcome).toBe('ongoing');

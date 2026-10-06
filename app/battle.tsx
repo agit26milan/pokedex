@@ -64,10 +64,8 @@ export default function BattleScreen() {
   const rng = useRef(mulberry32(wildId * 7919 + wildLevel)).current;
   const settled = useRef(false);
 
-  // A faint with a healthy replacement left is not a loss: the player must switch.
   const mustSwitch = battle?.outcome === 'lost' && party.some((m) => m.hp > 0 && m.id !== activeMemberId);
 
-  /** Rewards and write-backs run exactly once per finished battle, from the action handler. */
   const settle = useCallback(
     (finished: BattleState, index: number, wasFaintWithReserve: boolean) => {
       const store = useStore.getState();
@@ -125,14 +123,11 @@ export default function BattleScreen() {
 
       const resolved = resolveTurn(battle, action, rng);
 
-      // F3: the engine decides whether the item was used, and only then does the bag pay for it. A potion refused
-      // at full HP leaves the bag untouched.
       if (consumedFrom(resolved.events)) {
         const spent = action.kind === 'ball' ? store.spendItem(action.ball) : action.kind === 'item' ? store.spendItem('potion') : true;
         if (!spent) return;
       }
 
-      // F2: whoever took part in this turn keeps its HP and PP — for a switch that is the member from before it.
       const sync = sideSync(action, activeMemberId, battle.player, resolved.state.player);
       if (sync) {
         const index = useStore.getState().party.findIndex((member) => member.id === sync.memberId);
@@ -161,7 +156,6 @@ export default function BattleScreen() {
       const side = sideFromMember(member);
       if (!side) return;
 
-      // F2: the member leaving the field is written back first, so the damage and PP it took here are not erased.
       if (battle && activeMemberId !== null) {
         const leavingIndex = party.findIndex((current) => current.id === activeMemberId);
         if (leavingIndex >= 0) {

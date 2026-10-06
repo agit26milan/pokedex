@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Rebuild both release APKs from the current working tree and refresh dist/.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

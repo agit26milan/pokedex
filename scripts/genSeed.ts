@@ -1,12 +1,4 @@
-/**
- * Regenerates src/shared/data/pokedex.gen1.json from PokéAPI.
- * Run manually: npm run seed
- *
- * The app never calls PokéAPI for gameplay — this script is the only place that
- * depends on it at build time, so the world and battles work with no network.
- * Uses Node's global fetch instead of the app's axios instance on purpose:
- * build-time tooling should not pull app runtime dependencies.
- */
+
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 

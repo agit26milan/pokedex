@@ -1,4 +1,4 @@
-/** "mr-mime" -> "Mr Mime", "bulbasaur" -> "Bulbasaur". */
+
 export const titleCase = (value: string): string =>
   value
     .split('-')

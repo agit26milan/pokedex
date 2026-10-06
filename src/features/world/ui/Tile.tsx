@@ -19,10 +19,6 @@ interface TileProps {
   reachable: boolean;
 }
 
-/**
- * memo matters here: a step re-renders the world screen (steps and risk live in the
- * store) while all 400 tiles keep the same primitive props, so none of them re-render.
- */
 export const Tile = memo(function Tile({ type, reachable }: TileProps) {
   return (
     <View style={[styles.tile, { backgroundColor: FILL[type] }, reachable && styles.reachable]}>

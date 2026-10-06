@@ -139,15 +139,25 @@ The rules were treated as acceptance criteria, not decoration:
   callback props held stable by `useCallback` — that is the point of memoizing them.
 - `useMemo` appears exactly twice in the list screen, for work that is real: filtering 151 entries and
   building the caught-id `Set`.
-- `react-hooks/exhaustive-deps` is an error, and there is one deliberate, commented escape hatch
-  (the battle screen's mount guard for starting conditions).
+- `react-hooks/exhaustive-deps` is an error, and it is satisfied by construction: the battle screen's mount guard
+  derives its dependencies instead of silencing the rule. There is no `eslint-disable` anywhere in the codebase.
+
+## Comments
+
+The code carries no comments by request. That is a policy, not an omission: the reasoning that would otherwise sit
+next to the code lives in the OpenSpec change documents (`openspec/changes/*/design.md`), in `README.md`, and in
+`design/io-flow.md` for the data flow. Every non-obvious rule — the damage formula, why a switch must persist the
+outgoing member, why an item is only spent once the engine reports it consumed, why PP refills on level up — has a
+named home there, and the tests pin the behaviour.
 
 ## Testing
 
-133 unit tests: seeded RNG, chunk determinism and blocked movement, the encounter guarantee and rate,
-party overflow into storage, the type chart, damage monotonicity and crits, catch odds, the full turn
-engine (order, miss, PP rejection, switch cost, faint, run, determinism), XP and level-up move
-learning, glossary filtering, and the corrupt-storage fallback.
+187 unit tests: seeded RNG, chunk determinism and blocked movement, the encounter guarantee and rate,
+party overflow into storage, the type chart, damage monotonicity and crits, the damage class picking
+the right stat pair, catch odds, the full turn engine (order, miss, PP rejection, switch cost, faint,
+run, determinism), that a switch keeps the outgoing member's HP and PP, that an item is only consumed
+when it does something, XP and level-up move learning, persisted PP and the v1 to v2 save upgrade,
+glossary filtering, world ball throws, the new-run wipe, and the corrupt-storage fallback.
 
 Everything that decides an outcome is pure with an injected RNG, so a battle can be replayed exactly
 in a test. `logic/` folders contain no React and no AsyncStorage.

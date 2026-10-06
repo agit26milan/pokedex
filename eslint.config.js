@@ -16,7 +16,7 @@ module.exports = defineConfig([
     },
   },
   {
-    // Last so they win: build tooling and the Jest setup file run under Node/Jest.
+
     files: ['scripts/**/*.ts'],
     rules: { 'no-console': 'off' },
   },

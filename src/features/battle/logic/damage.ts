@@ -24,8 +24,6 @@ export interface DamageResult {
   effectiveness: number;
 }
 
-
-/** A special move fights with special attack and special defence; everything else uses the physical pair. */
 export function pickStats(
   attacker: Stats,
   defender: Stats,

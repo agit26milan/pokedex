@@ -16,7 +16,6 @@ interface PokemonListProps {
 
 const keyExtractor = (item: DexEntry): string => String(item.id);
 
-// Stride must match the row height plus the gap baked into the row style.
 const getItemLayout = (_data: unknown, index: number) => ({
   length: ROW_HEIGHT,
   offset: (ROW_HEIGHT + ROW_GAP) * index,
@@ -24,8 +23,6 @@ const getItemLayout = (_data: unknown, index: number) => ({
 });
 
 export function PokemonList({ query, typeFilters, caughtIds, onSelect }: PokemonListProps) {
-  // Real work on real data: filtering 151 entries is worth memoizing; a useMemo around
-  // anything smaller than this would just be noise.
   const visible = useMemo(() => filterPokemon(POKEDEX, { query, types: typeFilters }), [query, typeFilters]);
   const caught = useMemo(() => new Set(caughtIds), [caughtIds]);
 
@@ -64,7 +61,7 @@ function EmptyState() {
 }
 
 const styles = StyleSheet.create({
-  // 96 clears the bottom tab bar: the screen renders underneath it, so the last row was cut off.
+
   content: { paddingBottom: 96, paddingHorizontal: spacing.md },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, gap: spacing.xs },
   emptyTitle: { color: colors.text, fontWeight: '700', fontSize: 14 },

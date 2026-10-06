@@ -10,13 +10,13 @@ describe('throwBall', () => {
   });
 
   it('catches when the roll beats the odds and fails when it does not', () => {
-    expect(throwBall(16, 'pokeBall', fixed(0))?.caught).toBe(true); // pidgey is easy
+    expect(throwBall(16, 'pokeBall', fixed(0))?.caught).toBe(true);
     expect(throwBall(16, 'pokeBall', fixed(0.99))?.caught).toBe(false);
   });
 
   it('keeps the odds inside the engine floor and ceiling', () => {
     const easy = throwBall(16, 'pokeBall', fixed(0.5))!;
-    const hard = throwBall(150, 'pokeBall', fixed(0.5))!; // mewtwo
+    const hard = throwBall(150, 'pokeBall', fixed(0.5))!;
 
     expect(easy.chance).toBeLessThanOrEqual(0.95);
     expect(hard.chance).toBeGreaterThanOrEqual(0.03);

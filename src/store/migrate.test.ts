@@ -2,7 +2,6 @@ import { maxPpOf } from '@/shared/data/moves';
 import { STORE_VERSION } from '@/shared/lib/storage';
 import { isValidRun, migratePersisted } from './index';
 
-/** A save as version 1 wrote it: moves were bare names, and there was no PP anywhere. */
 const versionOneSave = () => ({
   party: [
     { id: 25, name: 'pikachu', level: 12, xp: 1728, hp: 30, maxHp: 40, moves: ['thundershock', 'growl'] },
@@ -55,7 +54,7 @@ describe('migratePersisted', () => {
   });
 
   it('rejects a payload whose moves are still bare names at the current version', () => {
-    // Guards the store against a save written by something that never went through the migration.
+
     expect(isValidRun(versionOneSave())).toBe(false);
   });
 });

@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Local Android toolchain for building a release APK without sudo and without an Expo account.
-# Installs into the user's home only: JDK 17 -> ~/Library/Java/JavaVirtualMachines
-#                                     Android SDK -> ~/Library/Android/sdk
 set -euo pipefail
 
 SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}"

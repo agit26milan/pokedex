@@ -30,7 +30,6 @@ export function isBlocked(type: TileType): boolean {
 
 export const chunkOf = (value: number): number => Math.floor(value / CHUNK_SIZE);
 
-/** Local tile within its chunk, always 0..CHUNK_SIZE-1 — works for negative coordinates too. */
 export const localOf = (value: number): number => ((value % CHUNK_SIZE) + CHUNK_SIZE) % CHUNK_SIZE;
 
 const STEP: Record<Direction, Position> = {
@@ -40,16 +39,10 @@ const STEP: Record<Direction, Position> = {
   right: { x: 1, y: 0 },
 };
 
-/**
- * Tile type at a global coordinate. Derived only from the world seed and the
- * coordinate, so the map is unbounded and identical on every run — nothing about
- * the world is ever stored.
- */
 export function tileAt(worldSeed: number, x: number, y: number): TileType {
   const local = hashSeed(worldSeed, chunkOf(x), chunkOf(y), localOf(x), localOf(y));
   const noise = local / 0xffffffff;
 
-  // Guarantee the spawn tile is walkable so a fresh run can never start boxed in.
   if (x === SPAWN.x && y === SPAWN.y) return 'path';
 
   if (noise < 0.20) return 'path';

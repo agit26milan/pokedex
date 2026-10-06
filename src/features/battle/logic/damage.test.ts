@@ -56,12 +56,9 @@ describe('computeDamage', () => {
   });
 });
 
-// F1: before this fix every move resolved against attack/defence, so a special attacker hit like a physical one.
-// Gengar (130 special attack / 65 attack) against Snorlax (65 defence / 110 special defence) is the cleanest probe:
-// the two pairs point in opposite directions, so a special move must do more and a physical move must do less.
 describe('damage class decides which stats fight', () => {
-  const attacker = statsAt(getEntry(94)!, 30); // gengar
-  const defender = statsAt(getEntry(143)!, 30); // snorlax
+  const attacker = statsAt(getEntry(94)!, 30);
+  const defender = statsAt(getEntry(143)!, 30);
 
   it('a special move fights with special attack against special defence', () => {
     expect(pickStats(attacker, defender, 'special')).toEqual({

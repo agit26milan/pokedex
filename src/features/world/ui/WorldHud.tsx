@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Sprite } from '@/shared/components/Sprite';
 import { maxPpOf } from '@/shared/data/moves';
@@ -12,11 +12,13 @@ interface WorldHudProps {
   steps: number;
   encounterRisk: number;
   chunkLabel: string;
+
+  onNewRun?: () => void;
 }
 
-export function WorldHud({ partner, bag, steps, encounterRisk, chunkLabel }: WorldHudProps) {
+export function WorldHud({ partner, bag, steps, encounterRisk, chunkLabel, onNewRun }: WorldHudProps) {
   const hpRatio = partner ? Math.max(0, Math.min(1, partner.hp / partner.maxHp)) : 0;
-  // PP is persisted now, so the card has to show it: a disabled move button should never be a surprise.
+
   const pp = partner ? partner.moves.reduce((total, slot) => total + slot.pp, 0) : 0;
   const maxPp = partner ? partner.moves.reduce((total, slot) => total + maxPpOf(slot.name), 0) : 0;
 
@@ -47,6 +49,17 @@ export function WorldHud({ partner, bag, steps, encounterRisk, chunkLabel }: Wor
         <View style={styles.kit}>
           <Text style={styles.chip}>◓ {bag.pokeBall}</Text>
           <Text style={styles.chip}>✚ {bag.potion}</Text>
+          {partner && onNewRun ? (
+            <Pressable
+              onPress={onNewRun}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel="Start a new run"
+              style={styles.newRun}
+            >
+              <Text style={styles.newRunLabel}>↺ NEW RUN</Text>
+            </Pressable>
+          ) : null}
         </View>
       </View>
 
@@ -84,7 +97,15 @@ const styles = StyleSheet.create({
   levelEmpty: { color: colors.danger },
   track: { height: 6, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.10)', overflow: 'hidden', marginTop: 8 },
   fill: { height: '100%', borderRadius: 99, backgroundColor: colors.accent },
-  kit: { gap: 6, justifyContent: 'center' },
+  kit: { gap: 6, justifyContent: 'center', alignItems: 'flex-end' },
+  newRun: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.danger,
+  },
+  newRunLabel: { color: colors.danger, fontFamily: font.mono, fontSize: 8.5, letterSpacing: 0.8 },
   chip: {
     color: colors.text,
     fontFamily: font.mono,

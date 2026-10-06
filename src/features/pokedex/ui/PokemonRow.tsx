@@ -17,10 +17,6 @@ interface PokemonRowProps {
   onPress: (id: number) => void;
 }
 
-/**
- * memo plus a stable `onPress` (useCallback in the list) is what keeps typing in the
- * search box from re-rendering 151 rows. Every prop here is primitive or a stable array.
- */
 export const PokemonRow = memo(function PokemonRow({ id, name, types, caught, onPress }: PokemonRowProps) {
   return (
     <Pressable

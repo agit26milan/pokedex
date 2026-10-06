@@ -5,7 +5,6 @@ import { Pressable, Text } from 'react-native';
 import { titleCase } from '@/shared/lib/format';
 import { PokemonRow } from './PokemonRow';
 
-// babel-plugin-jest-hoist lifts these above the imports at runtime, so the source order is honest.
 jest.mock('@/shared/lib/format', () => {
   const actual = jest.requireActual('@/shared/lib/format');
   return { ...actual, titleCase: jest.fn(actual.titleCase) };
@@ -20,11 +19,6 @@ const ROWS = [
   { id: 3, name: 'squirtle', types: ['water'] },
 ];
 
-/**
- * Render-count evidence for the memoization claim: `titleCase` runs inside PokemonRow's render,
- * so counting its calls counts the row renders. A stable onPress is what the app passes in
- * (useCallback); a fresh inline arrow stands in for the usual mistake.
- */
 function Harness({ stable }: { stable: boolean }) {
   const [bump, setBump] = useState(0);
   const stablePress = useCallback(() => undefined, []);
@@ -55,8 +49,6 @@ describe('PokemonRow memoization', () => {
     await render(<Harness stable />);
     const calls = titleCaseCalls();
 
-    // PokemonRow calls titleCase twice per render (accessibility label + visible name), so the
-    // assertions below are proportional rather than hard-coded to that number.
     expect(calls).toBeGreaterThanOrEqual(ROWS.length);
     expect(calls % ROWS.length).toBe(0);
   });

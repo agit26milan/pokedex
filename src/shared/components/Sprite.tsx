@@ -12,10 +12,6 @@ interface SpriteProps {
   back?: boolean;
 }
 
-/**
- * memo is worth it here: a list of 151 rows re-renders on every keystroke in the
- * search box, and each row's sprite props are primitive and stable.
- */
 export const Sprite = memo(function Sprite({ id, size, back = false }: SpriteProps) {
   return (
     <Image

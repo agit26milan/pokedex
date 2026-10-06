@@ -49,7 +49,7 @@ export function TypeFilter({ types, active, onToggle }: TypeFilterProps) {
 }
 
 const styles = StyleSheet.create({
-  // Explicit height: an unmeasured horizontal ScrollView clips the chips vertically on Android.
+
   scroller: { height: 40, flexGrow: 0 },
   row: { gap: 6, paddingHorizontal: spacing.lg, alignItems: 'center' },
   chip: {

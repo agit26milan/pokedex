@@ -11,11 +11,6 @@ export interface Stats {
 
 const contribution = (base: number, level: number): number => Math.floor(((base * 2) * level) / 100);
 
-/**
- * Gen-1 style stat derivation. Individual values and effort values are skipped
- * deliberately: without them the numbers stay deterministic and testable, which
- * matters more here than simulation fidelity.
- */
 export function statsAt(entry: DexEntry, level: number): Stats {
   const { hp, attack, defense, specialAttack, specialDefense, speed } = entry.baseStats;
   return {
@@ -30,7 +25,6 @@ export function statsAt(entry: DexEntry, level: number): Stats {
 
 export const maxHpFor = (entry: DexEntry, level: number): number => statsAt(entry, level).hp;
 
-/** Medium-fast growth (level ? cubing), the curve Gen-1 starters use. */
 export const xpForLevel = (level: number): number => level ** 3;
 
 export function levelFromXp(xp: number): number {

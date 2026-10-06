@@ -23,4 +23,4 @@ export type BagItem = keyof Bag;
 export const PARTY_LIMIT = 6;
 export const STARTER_IDS = [1, 4, 7] as const;
 export const STARTER_LEVEL = 5;
-export const INITIAL_BAG: Bag = { pokeBall: 10, greatBall: 2, potion: 3 };
+export const INITIAL_BAG: Bag = { pokeBall: 10, greatBall: 10, potion: 3 };

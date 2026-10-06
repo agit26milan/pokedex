@@ -16,7 +16,6 @@ interface EncounterSheetProps {
   onRun: () => void;
 }
 
-/** Shown over the map so the player never loses the sense of where they were. */
 export function EncounterSheet({ wild, balls, notice, onBattle, onThrowBall, onRun }: EncounterSheetProps) {
   const entry = getEntry(wild.id);
   if (!entry) return null;

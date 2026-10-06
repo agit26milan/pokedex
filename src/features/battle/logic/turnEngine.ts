@@ -49,7 +49,7 @@ export interface BattleEvent {
   damage?: number;
   effectiveness?: number;
   critical?: boolean;
-  /** Set on the action that spends a bag item, so the caller spends it only when the engine actually used it. */
+
   consumed?: boolean;
 }
 
@@ -57,7 +57,6 @@ export const BALL_BONUS: Record<BallName, number> = { pokeBall: 1, greatBall: 1.
 export const POTION_HEAL = 20;
 export const RUN_SUCCESS_RATE = 0.8;
 
-/** Abra, Ditto, Metapod and Kakuna have no damaging move, so the shared moves module supplies Struggle. */
 function damagingMoves(side: BattleSide): string[] {
   const usable = side.moves.filter((move) => move.pp > 0 && isDamaging(move.name)).map((move) => move.name);
   return usable.length > 0 ? usable : [STRUGGLE];
@@ -129,8 +128,6 @@ export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng):
     }
   }
 
-  // A potion at full HP would heal nothing, so it is refused here rather than silently wasted. Returning before
-  // the turn loop means it costs the player no turn, exactly like the unavailable-move rule above.
   if (action.kind === 'item' && player.hp >= player.maxHp) {
     return { state, events: [{ kind: 'item', consumed: false, text: `${player.name} is already at full HP.` }] };
   }
@@ -196,7 +193,6 @@ export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng):
 export const foeCaptureChance = (foe: BattleSide, ball: BallName): number =>
   catchChance({ captureRate: foe.captureRate, hp: foe.hp, maxHp: foe.maxHp, ballBonus: BALL_BONUS[ball] });
 
-/** True when the resolved turn actually used the item, so the caller knows whether to spend it from the bag. */
 export const consumedFrom = (events: readonly BattleEvent[]): boolean => events.some((event) => event.consumed === true);
 
 export const previewEffectiveness = (move: string, defenderTypes: readonly string[]): number =>

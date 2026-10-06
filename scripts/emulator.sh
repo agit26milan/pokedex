@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-# Boot the Android emulator WITH a window and run Pokédex Quest on it.
-#
-#   npm run emulator              release APK (self-contained, no Metro needed)
-#   npm run emulator -- --debug   debug build + Metro: dev menu, fast refresh, Hermes DevTools
-#   npm run emulator -- --airplane   network off, to test the offline paths
-#
-# Env: AVD=pokedex  APK=/path/to/app.apk
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -61,7 +54,6 @@ trap cleanup EXIT INT TERM
 adb wait-for-device
 until [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; do sleep 2; done
 
-# AVD settings survive between runs, so network state is set explicitly instead of assumed.
 if [ "$AIRPLANE" = "1" ]; then
   adb shell svc wifi disable
   adb shell svc data disable

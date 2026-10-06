@@ -22,7 +22,6 @@ describe('sideSync', () => {
     const action: BattleAction = { kind: 'switch', to: incoming };
     const sync = sideSync(action, leaving.id, leaving, incoming);
 
-    // The whole point of F2: the outgoing member keeps the damage, instead of being healed by the incoming side.
     expect(sync?.memberId).toBe(leaving.id);
     expect(sync?.side.hp).toBe(4);
     expect(sync?.side.id).toBe(leaving.id);

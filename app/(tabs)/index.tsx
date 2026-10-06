@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { throwBall } from '@/features/battle/logic/worldThrow';
@@ -17,7 +17,7 @@ import { chunkOf, isBlocked, nextPosition, tileAt, type Direction } from '@/feat
 import { getEntry } from '@/shared/data/dex';
 import { titleCase } from '@/shared/lib/format';
 import { mulberry32 } from '@/shared/lib/rng';
-import { useStore } from '@/store';
+import { useStore, caughtIdsOf } from '@/store';
 import { colors, spacing } from '@/theme/tokens';
 
 export default function PlayScreen() {
@@ -37,7 +37,29 @@ export default function PlayScreen() {
   const [wild, setWild] = useState<WildEncounter | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // One seeded stream per run keeps encounters reproducible for tests and debugging.
+  const onNewRun = useCallback(() => {
+    const state = useStore.getState();
+    const caught = caughtIdsOf(state).length;
+    Alert.alert(
+      'Start a new run?',
+      `This erases ${state.party.length} Pokémon, ${state.steps} steps and ${caught} caught entries.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'New run',
+          style: 'destructive',
+          onPress: () => {
+            state.resetRun();
+            setWild(null);
+            setNotice(null);
+            setSelectedId(null);
+            setSprint(false);
+          },
+        },
+      ],
+    );
+  }, []);
+
   const rng = useRef(mulberry32(worldSeed)).current;
   const partner = party[0];
 
@@ -86,10 +108,6 @@ export default function PlayScreen() {
     setNotice(null);
   }, []);
 
-  /**
-   * F5: throwing from the sheet spends a real ball and rolls the real odds, with the wild at full HP. A failed throw
-   * spends the ball and leaves the wild in place, so battling or running stay available.
-   */
   const onThrowBall = useCallback(() => {
     if (!wild) return;
     const state = useStore.getState();
@@ -131,6 +149,7 @@ export default function PlayScreen() {
       <WorldHud
         partner={partner}
         bag={bag}
+        onNewRun={party.length > 0 ? onNewRun : undefined}
         steps={steps}
         encounterRisk={encounterRisk}
         chunkLabel={`CHUNK ${chunkOf(position.x)},${chunkOf(position.y)}`}

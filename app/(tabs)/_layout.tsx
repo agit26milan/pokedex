@@ -5,10 +5,6 @@ import { colors, font } from '@/theme/tokens';
 
 const ICON = 15;
 
-/**
- * Dependency-free tab glyphs. @expo/vector-icons is not a dependency here, and pulling a font
- * package in for two icons is not worth it — a triangle and a stack of bars render everywhere.
- */
 function TabIcon({ shape, color }: { shape: 'play' | 'list'; color: ColorValue }) {
   if (shape === 'play') {
     return <View style={[styles.triangle, { borderLeftColor: color }]} />;

@@ -6,7 +6,6 @@ interface Matchups {
   x0?: TypeName[];
 }
 
-/** Modern 18-type chart: Gen-1 species already carry fairy/steel typing, so it must be complete. */
 const CHART: Record<TypeName, Matchups> = {
   normal: { x05: ['rock', 'steel'], x0: ['ghost'] },
   fire: { x2: ['grass', 'ice', 'bug', 'steel'], x05: ['fire', 'water', 'rock', 'dragon'] },
@@ -37,7 +36,6 @@ export const multiplierAgainst = (attackType: TypeName, defenderType: TypeName):
   return 1;
 };
 
-/** Dual types multiply: a Grass/Ice target takes 4x from Fire. */
 export const effectiveness = (attackType: TypeName, defenderTypes: readonly TypeName[]): number =>
   defenderTypes.reduce((total, type) => total * multiplierAgainst(attackType, type), 1);
 

@@ -9,12 +9,18 @@ import { createWorldSlice, NEW_RUN_WORLD, type WorldSlice } from '@/features/wor
 import { maxPpOf } from '@/shared/data/moves';
 import { STORE_VERSION, zustandStorage } from '@/shared/lib/storage';
 
-export type RunState = PartySlice & WorldSlice & PokedexSlice;
+export interface RunActions {
+
+  resetRun: () => void;
+}
+
+export type RunState = PartySlice & WorldSlice & PokedexSlice & RunActions;
 
 const runState: StateCreator<RunState> = (set, get, api) => ({
   ...createPartySlice(set, get, api),
   ...createWorldSlice(set, get, api),
   ...createPokedexSlice(set, get, api),
+  resetRun: () => set(freshRun()),
 });
 
 export const createRunStore = () => createStore<RunState>()(runState);
@@ -25,13 +31,15 @@ export function freshRun(): Partial<RunState> {
     storage: [],
     leaderId: null,
     bag: { ...INITIAL_BAG },
+
+    query: '',
+    typeFilters: [],
     ...NEW_RUN_WORLD,
   };
 }
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
-/** v1 stored a member's moves as bare names; v2 stores { name, pp }. Upgrade in place, never drop the save. */
 const upgradeMemberV1 = (member: unknown): unknown => {
   if (!isRecord(member) || !Array.isArray(member.moves)) return member;
   return {
@@ -49,7 +57,6 @@ const upgradeRunV1 = (value: unknown): unknown => {
   };
 };
 
-/** Exported so the upgrade path is unit-tested rather than trusted. */
 export function migratePersisted(persisted: unknown, version: number): unknown {
   if (version >= STORE_VERSION) return persisted;
   if (version === 1) return upgradeRunV1(persisted);
@@ -72,7 +79,6 @@ export function isValidRun(value: unknown): value is Partial<RunState> {
   );
 }
 
-/** Exported so the fallback path is unit-tested rather than trusted. */
 export function mergePersisted(persisted: unknown, current: RunState): RunState {
   if (!isValidRun(persisted)) return { ...current, ...freshRun() } as RunState;
   return { ...current, ...persisted };

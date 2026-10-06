@@ -1,9 +1,5 @@
 export type Rng = () => number;
 
-/**
- * mulberry32 — small seeded PRNG. Every random decision in the game goes through
- * an Rng instance so tests can replay an exact battle or encounter sequence.
- */
 export function mulberry32(seed: number): Rng {
   let a = seed >>> 0;
   return () => {
@@ -15,7 +11,6 @@ export function mulberry32(seed: number): Rng {
   };
 }
 
-/** Stable 32-bit seed from integers, used for per-chunk world generation. */
 export function hashSeed(...parts: number[]): number {
   let h = 0x811c9dc5;
   for (const part of parts) {

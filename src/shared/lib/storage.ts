@@ -1,11 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createJSONStorage } from 'zustand/middleware';
 
-
 export const zustandStorage = createJSONStorage(() => AsyncStorage);
 
-// v2: party moves became { name, pp } slots instead of bare names, so persisted runs need the upgrade in
-// src/store/index.ts. Bumped rather than reset so a save from v1 keeps its party, bag and position.
 export const STORE_VERSION = 2;
 
 export const CACHE_PREFIX = 'pokedex-quest/cache/';

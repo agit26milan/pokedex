@@ -6,18 +6,12 @@ import type { BattleSide } from './turnEngine';
 
 const DEFAULT_MOVE_COUNT = 4;
 
-/**
- * Abra, Ditto, Metapod and Kakuna have no damaging level-up move. Without a fallback the player
- * could field one and be unable to ever win, so Struggle joins the moveset as a last resort.
- * `withUsableMove` lives in the shared moves module so level-up applies the same rule.
- */
 const battleMoves = (slots: readonly MoveSlot[]) =>
   withUsableMove(slots).map((slot) => {
     const maxPp = maxPpOf(slot.name);
     return { name: slot.name, pp: Math.min(slot.pp, maxPp), maxPp };
   });
 
-/** Wild or freshly built opponent straight from the seed, at full PP. */
 export function createSide(id: number, level: number): BattleSide | undefined {
   const entry = getEntry(id);
   if (!entry) return undefined;
@@ -35,7 +29,6 @@ export function createSide(id: number, level: number): BattleSide | undefined {
   };
 }
 
-/** Player side keeps the HP and the PP the party member already spent. */
 export function sideFromMember(member: PartyMember): BattleSide | undefined {
   const entry = getEntry(member.id);
   if (!entry) return undefined;
@@ -54,7 +47,6 @@ export function sideFromMember(member: PartyMember): BattleSide | undefined {
   };
 }
 
-/** Writes the battle result back onto the party member, PP included, so it survives the battle. */
 export function memberFromSide(member: PartyMember, side: BattleSide): PartyMember {
   return {
     ...member,
