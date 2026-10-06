@@ -13,6 +13,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "seed": "tsx scripts/genSeed.ts",
+    "emulator": "bash scripts/emulator.sh",
     "e2e:android": "bash scripts/emulator-e2e.sh",
     "android:apk": "eas build -p android --profile preview",
     "android:apk:local": "expo prebuild -p android --clean && cd android && ./gradlew assembleRelease",

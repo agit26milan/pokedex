@@ -1,10 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createJSONStorage } from 'zustand/middleware';
 
-/**
- * AsyncStorage rather than MMKV on purpose: MMKV needs a dev build, and the app
- * has to stay runnable from a plain Expo Go QR scan.
- */
+
 export const zustandStorage = createJSONStorage(() => AsyncStorage);
 
 export const STORE_VERSION = 1;
