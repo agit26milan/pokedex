@@ -33,7 +33,7 @@ rather than a unit test.
 ## 4. Glossary (fills the tab while Play is built)
 
 - [x] 4.1 `logic/filterPokemon.ts` (search + multi-type filter, pure) with unit tests for search, filter, intersection, empty result.
-- [ ] 4.2 `ui/PokemonList.tsx` + `ui/PokemonRow.tsx` + `ui/SearchBar.tsx` + `ui/TypeFilter.tsx` wired to the store;
+- [x] 4.2 `ui/PokemonList.tsx` + `ui/PokemonRow.tsx` + `ui/SearchBar.tsx` + `ui/TypeFilter.tsx` wired to the store;
       FlatList tuning from design.md; memoization only where props are primitive.
 - [ ] 4.3 `(glossary)/[id].tsx` detail from seed, then axios enrichment + AsyncStorage cache with TTL and silent fallback.
       `[E2E]` open detail with airplane mode on.
