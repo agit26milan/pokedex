@@ -7,7 +7,6 @@
     "icon": "./assets/icon.png",
     "scheme": "pokedexquest",
     "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.agitafirstawan.pokedexquest"
