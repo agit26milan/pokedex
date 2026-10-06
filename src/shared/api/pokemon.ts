@@ -28,11 +28,7 @@ interface RawSpecies {
 
 const cacheKey = (id: number): string => `detail/${id}`;
 
-/**
- * Second source for the detail screen only. The screen renders from the bundled seed
- * first, so a failure here degrades to "fewer facts", never to an empty screen.
- * Cached for CACHE_TTL_MS so reopening a Pokémon does not hit the network again.
- */
+
 export async function getEnrichedDetail(id: number): Promise<FetchResult<EnrichedDetail>> {
   const cached = await readCache<EnrichedDetail>(cacheKey(id));
   if (cached) return { ok: true, data: cached };

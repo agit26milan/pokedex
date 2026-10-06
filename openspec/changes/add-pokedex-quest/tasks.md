@@ -102,7 +102,14 @@ rather than a unit test.
       _typecheck 0, lint 0, 137 tests across 17 suites — the count is read from the Jest summary, not estimated._
 - [ ] 8.2 `[E2E]` Two-minute tour on a real device via Expo Go QR: partner → tall grass → encounter → win → catch → Glossary
       shows the caught mark.
-- [ ] 8.3 `[E2E]` Airplane mode run: world, battle, list, search, filter and detail all still work.
+- [x] 8.3 `[E2E]` Airplane mode run: world, battle, list, search, filter and detail all still work.
+      _Verified on the emulator with `airplane_mode_on=1` (wifi and data off, status-bar plane icon visible): the Play tab
+      renders, the Glossary renders all 151 entries with names, dex numbers and type badges, and the detail screen shows
+      base stats, the Red/Blue learnset with power values, the evolution chain and the designed fallback line "Seed data
+      shown. PokéAPI enrichment unavailable: PokéAPI is unreachable." Sprites are the documented offline degradation
+      (nothing cached on a fresh install). This pass also caught two real UI defects that are now fixed: the type chips
+      were vertically clipped (unmeasured horizontal ScrollView on Android) and the list needed bottom padding to clear
+      the tab bar. Screenshots: `/tmp/pkmn-air-*.png`._
 - [x] 8.4 Sanity-check non-goals are still non-goals (no trainer battle, no status effect, no native module added).
       _Checked rather than assumed: `grep -riE "trainer"` and a burn/paralyze/sleep-status grep both return nothing, and
       every native dependency resolves inside Expo Go's `bundledNativeModules.json` at the installed version

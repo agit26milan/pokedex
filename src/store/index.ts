@@ -16,7 +16,6 @@ const runState: StateCreator<RunState> = (set, get, api) => ({
   ...createPokedexSlice(set, get, api),
 });
 
-/** Unpersisted store: tests and the reset flow use this shape. */
 export const createRunStore = () => createStore<RunState>()(runState);
 
 export function freshRun(): Partial<RunState> {
@@ -29,7 +28,6 @@ export function freshRun(): Partial<RunState> {
   };
 }
 
-/** Shape check for anything coming back out of storage: a bad run must never crash the app. */
 export function isValidRun(value: unknown): value is Partial<RunState> {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<RunState>;
@@ -51,8 +49,6 @@ export const useStore = create<RunState>()(
     name: 'pokedex-quest/run',
     version: STORE_VERSION,
     storage: zustandStorage,
-    // Battle state and list filters stay transient: a reload must never restore a
-    // half-finished battle, and filters are not worth persisting.
     partialize: (state) => ({
       party: state.party,
       storage: state.storage,

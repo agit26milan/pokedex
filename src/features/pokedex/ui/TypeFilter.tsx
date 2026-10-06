@@ -37,6 +37,7 @@ export function TypeFilter({ types, active, onToggle }: TypeFilterProps) {
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
+      style={styles.scroller}
       contentContainerStyle={styles.row}
       keyboardShouldPersistTaps="handled"
     >
@@ -48,7 +49,9 @@ export function TypeFilter({ types, active, onToggle }: TypeFilterProps) {
 }
 
 const styles = StyleSheet.create({
-  row: { gap: 6, paddingHorizontal: spacing.lg, paddingVertical: 2 },
+  // Explicit height: an unmeasured horizontal ScrollView clips the chips vertically on Android.
+  scroller: { height: 40, flexGrow: 0 },
+  row: { gap: 6, paddingHorizontal: spacing.lg, alignItems: 'center' },
   chip: {
     paddingHorizontal: 10,
     paddingVertical: 7,
@@ -57,5 +60,5 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.10)',
     backgroundColor: 'rgba(255,255,255,0.04)',
   },
-  label: { fontFamily: font.mono, fontSize: 10, fontWeight: '700', letterSpacing: 0.9 },
+  label: { fontFamily: font.mono, fontSize: 10, lineHeight: 15, fontWeight: '700', letterSpacing: 0.9 },
 });

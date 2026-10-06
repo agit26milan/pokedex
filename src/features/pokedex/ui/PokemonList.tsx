@@ -64,7 +64,8 @@ function EmptyState() {
 }
 
 const styles = StyleSheet.create({
-  content: { paddingBottom: spacing.xl, paddingHorizontal: spacing.md },
+  // 96 clears the bottom tab bar: the screen renders underneath it, so the last row was cut off.
+  content: { paddingBottom: 96, paddingHorizontal: spacing.md },
   empty: { alignItems: 'center', paddingTop: spacing.xxl, gap: spacing.xs },
   emptyTitle: { color: colors.text, fontWeight: '700', fontSize: 14 },
   emptyHint: { color: colors.textDim, fontSize: 12, textAlign: 'center' },
