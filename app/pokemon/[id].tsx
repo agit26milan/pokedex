@@ -6,12 +6,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Sprite } from '@/shared/components/Sprite';
 import { TypeBadge } from '@/shared/components/TypeBadge';
 import { getEnrichedDetail, type EnrichedDetail } from '@/shared/api/pokemon';
-import { MOVES, getEntry } from '@/shared/data/dex';
+import { MOVES, getEntry, type EvolutionStep } from '@/shared/data/dex';
 import { dexNumber, titleCase } from '@/shared/lib/format';
 import { useStore } from '@/store';
 import { colors, font, radius, spacing } from '@/theme/tokens';
 
 const MAX_BASE_STAT = 200;
+
+const triggerLabel = (step: EvolutionStep): string => {
+  if (step.method === 'level') return `Lv${String(step.level ?? 0).padStart(2, '0')}`;
+  if (step.method === 'stone') return 'STONE';
+  return 'TRADE';
+};
+
+const stepRow = (label: string, text: string, key: string) => (
+  <View key={key} style={styles.moveRow}>
+    <Text style={styles.moveLevel}>{label}</Text>
+    <Text style={styles.moveName}>{text}</Text>
+  </View>
+);
+
+const describeStep = (step: EvolutionStep): string =>
+  `${dexNumber(step.id)} ${titleCase(step.name)}${step.item ? ` · ${titleCase(step.item)}` : ''}`;
 
 export default function PokemonDetail() {
   const params = useLocalSearchParams<{ id: string }>();
@@ -79,12 +95,13 @@ export default function PokemonDetail() {
         </Section>
 
         <Section title="EVOLUTION">
-          {entry.evolution.map((stage) => (
-            <View key={stage.id} style={styles.moveRow}>
-              <Text style={styles.moveLevel}>{dexNumber(stage.id)}</Text>
-              <Text style={styles.moveName}>{titleCase(stage.name)}</Text>
-            </View>
-          ))}
+          {entry.evolution.from
+            ? stepRow('FROM', `${describeStep(entry.evolution.from)} · ${triggerLabel(entry.evolution.from)}`, 'from')
+            : null}
+          {entry.evolution.to.map((step) => stepRow(triggerLabel(step), describeStep(step), String(step.id)))}
+          {!entry.evolution.from && entry.evolution.to.length === 0
+            ? stepRow('—', 'Does not evolve in Gen 1', 'none')
+            : null}
         </Section>
 
         <Text style={styles.source}>

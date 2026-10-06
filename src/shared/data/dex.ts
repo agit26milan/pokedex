@@ -13,13 +13,28 @@ export interface BaseStats {
   speed: number;
 }
 
+export type EvolutionMethod = 'level' | 'stone' | 'trade';
+
+export interface EvolutionStep {
+  id: number;
+  name: string;
+  method: EvolutionMethod;
+  level?: number;
+  item?: string;
+}
+
+export interface EvolutionInfo {
+  from: EvolutionStep | null;
+  to: EvolutionStep[];
+}
+
 export interface DexEntry {
   id: number;
   name: string;
   captureRate: number;
   types: string[];
   baseStats: BaseStats;
-  evolution: { id: number; name: string }[];
+  evolution: EvolutionInfo;
   moves: { name: string; level: number }[];
 }
 

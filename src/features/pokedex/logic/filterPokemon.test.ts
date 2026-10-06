@@ -2,7 +2,7 @@ import type { DexEntry } from '@/shared/data/dex';
 import { filterPokemon } from './filterPokemon';
 
 const entry = (id: number, name: string, types: string[]): DexEntry =>
-  ({ id, name, types, captureRate: 45, baseStats: {} as DexEntry['baseStats'], evolution: [], moves: [] });
+  ({ id, name, types, captureRate: 45, baseStats: {} as DexEntry['baseStats'], evolution: { from: null, to: [] }, moves: [] });
 
 const PIKACHU = entry(25, 'pikachu', ['electric']);
 const RAICHU = entry(26, 'raichu', ['electric']);

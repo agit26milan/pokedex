@@ -1,12 +1,13 @@
 import seed from './pokedex.gen1.json';
 
+type Step = { id: number; name: string; method: 'level' | 'stone' | 'trade'; level?: number; item?: string };
 type Entry = {
   id: number;
   name: string;
   captureRate: number;
   types: string[];
   baseStats: Record<string, number>;
-  evolution: { id: number; name: string }[];
+  evolution: { from: Step | null; to: Step[] };
   moves: { name: string; level: number }[];
 };
 type Move = { type: string; power: number; accuracy: number; pp: number; damageClass: string };
@@ -60,9 +61,64 @@ describe('pokedex.gen1 seed', () => {
     }
   });
 
-  it('only links evolution stages inside Gen 1', () => {
+  it('gives every Gen 1 evolution a real trigger and an existing partner', () => {
+    const byId = new Map(pokemon.map((entry) => [entry.id, entry]));
+    const steps = pokemon.flatMap((entry) => [...entry.evolution.to, ...(entry.evolution.from ? [entry.evolution.from] : [])]);
+
+    expect(steps.length).toBeGreaterThan(40);
+    for (const step of steps) {
+      expect(step.id).toBeLessThanOrEqual(151);
+      expect(byId.has(step.id)).toBe(true);
+      if (step.method === 'level') expect(step.level).toBeGreaterThan(0);
+      if (step.method === 'stone') expect(step.item).toBeTruthy();
+      if (step.method === 'trade') expect(step.level).toBeUndefined();
+    }
+  });
+
+  it('agrees in both directions about every link', () => {
+    const byId = new Map(pokemon.map((entry) => [entry.id, entry]));
+    let links = 0;
     for (const entry of pokemon) {
-      for (const stage of entry.evolution) expect(stage.id).toBeLessThanOrEqual(151);
+      for (const step of entry.evolution.to) {
+        const target = byId.get(step.id)!;
+        expect(target.evolution.from).toMatchObject({ id: entry.id, name: entry.name, method: step.method });
+        links += 1;
+      }
+      if (entry.evolution.from) {
+        const source = byId.get(entry.evolution.from.id)!;
+        expect(source.evolution.to.some((next) => next.id === entry.id)).toBe(true);
+      }
+    }
+    expect(links).toBeGreaterThan(40);
+  });
+
+  it('records the level, stone and trade cases the games actually have', () => {
+    const byId = new Map(pokemon.map((entry) => [entry.id, entry]));
+    expect(byId.get(2)!.evolution.from).toEqual({ id: 1, name: 'bulbasaur', method: 'level', level: 16 });
+    expect(byId.get(2)!.evolution.to).toEqual([{ id: 3, name: 'venusaur', method: 'level', level: 32 }]);
+    expect(byId.get(25)!.evolution.to).toEqual([{ id: 26, name: 'raichu', method: 'stone', item: 'thunder-stone' }]);
+    expect(byId.get(64)!.evolution.to).toEqual([{ id: 65, name: 'alakazam', method: 'trade' }]);
+    expect(byId.get(3)!.evolution.to).toEqual([]);
+  });
+
+  it('drops a predecessor that only exists after Gen 1', () => {
+    const byId = new Map(pokemon.map((entry) => [entry.id, entry]));
+    expect(byId.get(25)!.evolution.from).toBeNull();
+    expect(byId.get(35)!.evolution.from).toBeNull();
+    expect(byId.get(124)!.evolution.from).toBeNull();
+  });
+
+  it('keeps Eevee branching in parallel instead of chaining its evolutions', () => {
+    const eevee = pokemon.find((entry) => entry.id === 133)!;
+    expect(eevee.evolution.to.map((step) => step.name).sort()).toEqual(['flareon', 'jolteon', 'vaporeon']);
+    expect(eevee.evolution.to.every((step) => step.method === 'stone')).toBe(true);
+    expect(eevee.evolution.from).toBeNull();
+  });
+
+  it('never links a Pokemon to itself', () => {
+    for (const entry of pokemon) {
+      expect(entry.evolution.to.some((step) => step.id === entry.id)).toBe(false);
+      expect(entry.evolution.from?.id).not.toBe(entry.id);
     }
   });
 

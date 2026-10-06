@@ -37,11 +37,64 @@ async function pool<T, R>(items: readonly T[], limit: number, work: (item: T, in
 
 const idFromUrl = (url: string): number => Number(url.split('/').filter(Boolean).pop());
 
-function flattenEvolution(node: Json, out: { id: number; name: string }[] = []) {
-  if (node?.species) out.push({ id: idFromUrl(node.species.url), name: node.species.name });
-  for (const child of node?.evolves_to ?? []) flattenEvolution(child, out);
-  return out;
+type EvolutionMethod = 'level' | 'stone' | 'trade';
+
+type RawStep =
+  | { id: number; name: string; method: EvolutionMethod; level?: number; item?: string }
+  | { id: number; name: string; method: 'other'; level?: number; item?: string };
+
+type EvolutionStep = Omit<RawStep, 'method'> & { method: EvolutionMethod };
+
+type EvolutionInfo = { from: EvolutionStep | null; to: EvolutionStep[] };
+
+type RawInfo = { from: RawStep | null; to: RawStep[] };
+
+const stepFrom = (child: Json): RawStep => {
+  const details = (child.evolution_details ?? []) as Json[];
+  const detail =
+    details.find((d) => d.trigger?.name === 'level-up' && d.min_level != null) ??
+    details.find((d) => d.trigger?.name === 'use-item') ??
+    details.find((d) => d.trigger?.name === 'trade') ??
+    details[0] ??
+    {};
+  const trigger = detail.trigger?.name as string | undefined;
+  const id = idFromUrl(child.species.url);
+  const name = child.species.name as string;
+  if (trigger === 'use-item') return { id, name, method: 'stone', item: detail.item?.name as string };
+  if (trigger === 'trade') return { id, name, method: 'trade' };
+  if (trigger === 'level-up' && detail.min_level != null) {
+    return { id, name, method: 'level', level: detail.min_level as number };
+  }
+  return { id, name, method: 'other' };
+};
+
+function evolutionMap(chain: Json): Map<number, RawInfo> {
+  const map = new Map<number, RawInfo>();
+  const walk = (node: Json, from: RawStep | null): void => {
+    map.set(idFromUrl(node.species.url), { from, to: (node.evolves_to ?? []).map(stepFrom) });
+    for (const child of node.evolves_to ?? []) {
+      const details = stepFrom(child);
+      walk(child, { ...details, id: idFromUrl(node.species.url), name: node.species.name as string });
+    }
+  };
+  walk(chain.chain, null);
+  return map;
 }
+
+const keep = (step: RawStep): EvolutionStep => {
+  if (step.method === 'other') {
+    throw new Error(`Gen 1 evolution without a level, stone or trade: ${step.name}`);
+  }
+  return step;
+};
+
+const gen1Evolution = (info: RawInfo | undefined): EvolutionInfo => {
+  const from = info?.from ?? null;
+  return {
+    from: from && from.id <= LAST_DEX_ID ? keep(from) : null,
+    to: (info?.to ?? []).filter((step) => step.id <= LAST_DEX_ID).map(keep),
+  };
+};
 
 function levelUpMoves(detail: Json): { name: string; level: number }[] {
   const moves: { name: string; level: number }[] = [];
@@ -79,7 +132,7 @@ async function main() {
       specialDefense: detail.stats[4].base_stat as number,
       speed: detail.stats[5].base_stat as number,
     },
-    evolution: flattenEvolution(chain.chain).filter((stage) => stage.id <= LAST_DEX_ID),
+    evolution: gen1Evolution(evolutionMap(chain).get(id)),
     moves: levelUpMoves(detail),
   }));
 
