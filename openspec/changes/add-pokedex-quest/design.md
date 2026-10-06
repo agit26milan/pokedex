@@ -87,12 +87,16 @@ Rationale: the demo tour must never depend on hotel wifi. PokéAPI is an enhance
 
 - Single pure entry point: `resolveTurn(state, action, rng) -> { state, events[] }`. Events are log lines/media cues the
   UI plays back; the UI never computes damage itself.
-- Damage: Gen-1 style formula on level, attack, defense, STAB, 18-type multiplier, 6.25% crit, accuracy roll before
-  damage, PP decremented per use.
-- Catch rate: rises as wild HP falls (`a` scaled by HP ratio, ball multiplier for Poké Balls). Success adds to party,
-  or to storage when the party holds 6; both mark the dex.
-- Player actions: Use Move, Switch, Use Item, Run. Switch and non-damaging items consume the turn; Run is 80% against
-  wild Pokémon.
+- Damage: Gen-1 style formula on level, the move's **damage class** (a `special` move fights with special attack against
+  special defence, physical keeps attack against defence — corrected in change `fix-battle-correctness`, where those two
+  stats had been dead values), STAB, 18-type multiplier, 6.25% crit, accuracy roll before damage. PP is spent per use and
+  is persisted on the party member; it refills on level up and after a loss, which are the only recovery paths.
+- Catch rate: rises as wild HP falls (`a` scaled by HP ratio, ball multiplier for Poké Balls). A ball can be thrown in
+  battle or straight from the encounter sheet, where the wild is at full HP and the odds are therefore worst.
+  Success adds to party, or to storage when the party holds 6; both mark the dex.
+- Player actions: Use Move, Switch, Use Item, Run. A switch consumes the turn and the member leaving the field keeps the
+  damage and PP it took (switching is not a free heal); an item is spent only when the engine reports it did something;
+  Run is 80% against wild Pokémon.
 - XP and level up use Gen-1 thresholds; level-up moves are learned automatically (no modal, keeps the tour flowing).
 - Randomness always comes from `lib/rng.ts` (mulberry32, injectable seed) so unit tests replay exact battles.
 

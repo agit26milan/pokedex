@@ -71,7 +71,7 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 | Package | `com.agitafirstawan.pokedexquest`, versionCode 1, versionName 1.0.0, targetSdk 36 |
 | Label / activity | `Pokédex Quest` / `.MainActivity` |
 | Self-contained | `assets/index.android.bundle` (3.2 MB) is embedded in both, so they run with Metro stopped and no network |
-| SHA-256 | universal `6320fced414dbde78ca28aaf5e17ecc6f1c448e844587b17102ca1ce52d71340`, arm64 `48ff37f1124048ca15b976fd6f32abdb1f2bc019bc62d403204f7992ffec6d47` |
+| SHA-256 | universal `fff057f092d3ca73522af7d9b7b69c67713fd2ecd4eb83004e60e269ab6f3e72`, arm64 `aea8ffba01b395c461657da71d46d60d7280698d05f029bdeda2b3ddd0d14b75` |
 
 Verified by inspecting the produced file (`aapt2 dump badging`, `unzip -l`), not by assuming the build
 succeeded, and launched on an emulator (see task 9.7 in the OpenSpec change). Test files live under
@@ -154,12 +154,16 @@ in a test. `logic/` folders contain no React and no AsyncStorage.
 
 ## Known limitations
 
-- **On-device E2E was not run**: this machine has no Android device/emulator attached and no Xcode, so
-  the walk-through, haptics, sprite loading, detail enrichment with airplane mode on, and the
-  kill/relaunch persistence check are documented as pending rather than claimed. All four are covered
-  by unit tests where logic allows.
+- **Device coverage is an emulator, not a physical phone.** On an Android 36 arm64 emulator the release APK installs,
+  launches, and runs with airplane mode on (credentials-free, `scripts/emulator-e2e.sh` / `npm run e2e:android`), and
+  the project also loads through Expo Go's `exp://` URL — the same URL the QR code encodes. Still unverified: real
+  haptics, GPU-realistic frame timing, and a hand-driven run of the whole tour. The tour's logic is pinned headlessly in
+  `src/tour.test.ts` instead of being claimed from a screenshot.
 - **iOS**: `eas.json` has the profiles ready, but an installable IPA needs Xcode plus a paid Apple
   Developer account and a provisioning profile — out of scope for this take-home.
-- **Status effects and non-damaging move effects are out of scope** (phase 2 by agreement).
+- **Status effects, held items, and an item-based way to restore PP are out of scope** (phase 2 by agreement). PP does
+  persist between battles and is refilled on level up and after a loss. That is deliberate rather than faithful to Gen 1:
+  the original leans on long dungeons, Pokémon Centers and Ethers, none of which exist here, so importing PP without a
+  recovery path would strand a run with no usable move.
 - Sprites are loaded from the PokeAPI sprite CDN at runtime; the app degrades to type badges if it is
   offline, and the detail screen shows a short notice instead of a blank panel.

@@ -49,7 +49,9 @@ adb install -r "$APK"
 echo "==> launching $ACTIVITY"
 adb shell am start -n "$ACTIVITY" >/dev/null
 
-sleep 12
+# 25s, not 12: a cold start on a software-GPU emulator once took longer than 12s and produced a blank
+# screenshot, which looks exactly like a broken build. The wait was the problem, not the app.
+sleep 25
 adb exec-out screencap -p >"$SHOT"
 echo "==> screenshot: $SHOT"
 
