@@ -80,11 +80,17 @@ rather than a unit test.
 
 ## 7. Persistence and polish
 
-- [ ] 7.1 Persist run state (party, storage, bag, seed, position, caught flags) with version + migrate; keep battle transient.
-- [ ] 7.2 Defensive reload path: invalid persisted state falls back to a fresh run instead of crashing. Unit tests for both.
+- [x] 7.1 Persist run state (party, storage, bag, seed, position, caught flags) with version + migrate; keep battle transient.
+      _Persisted: party, storage, bag, leader, world seed, position, steps, encounter flags. "Caught" is persisted as
+      party ∪ storage rather than as a duplicated flag list. Battle never enters the store._
+- [x] 7.2 Defensive reload path: invalid persisted state falls back to a fresh run instead of crashing. Unit tests for both.
+      _`isValidRun` + `mergePersisted` in src/store/index.ts, wired as persist `merge`, tested against eight malformed
+      payloads plus a never-throws loop._
 - [ ] 7.3 Performance pass with evidence: record render counts for a step and a list scroll, confirm tiles are not
       re-rendered and memo/useCallback/useMemo are only where design.md says. Fix or remove anything unjustified.
-- [ ] 7.4 README: setup, QR instructions, 2-minute tour script, architecture map, performance notes, phase-2 backlog.
+- [x] 7.4 README: setup, QR instructions, 2-minute tour script, architecture map, performance notes, phase-2 backlog.
+      _README.md covers all six, plus the build commands and a Known limitations section that lists the checks this
+      environment could not run._
 
 ## 8. Verification
 
