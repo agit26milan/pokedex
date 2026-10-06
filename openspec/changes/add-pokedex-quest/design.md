@@ -98,10 +98,11 @@ Rationale: the demo tour must never depend on hotel wifi. PokéAPI is an enhance
 
 ## State model
 
-One zustand root store composed of four slices: `party`, `world`, `battle`, `pokedex`. `party`, `world` and `pokedex`
-are wrapped by `persist` (AsyncStorage, version + migrate); `battle` is deliberately NOT persisted. Components read
-with narrow selectors (`useStore(s => s.world.risk)`, `useShallow` for multi-field) so a step does not re-render the
-Glossary or the move grid.
+One zustand root store composed of three slices: `party`, `world`, `pokedex`. `party`, `world` and `pokedex` are wrapped
+by `persist` (AsyncStorage, version + migrate). **Battle state is not in the store at all** — the battle screen owns it
+with a lazy `useState`, which makes "a reload never restores a half-finished battle" true by construction rather than by
+a `partialize` list. Components read with narrow selectors (`useStore(s => s.world.encounterRisk)`, `useShallow` for
+multi-field) so a step does not re-render the Glossary or the move grid.
 
 ## Performance rules (acceptance criteria, not decoration)
 

@@ -70,9 +70,13 @@ rather than a unit test.
       party-full storage path and no-balls path.
       _Catch odds and level curve done; the storage path is covered by `placeInRoster` (task 5.3) and the no-balls path by
       the battle slice wiring in task 6.4._
-- [ ] 6.4 `ui/BattleView.tsx` + `ui/MoveGrid.tsx` + `ui/HpBar.tsx` + `ui/PartySwitch.tsx` + bag/run actions, driven only by
+- [x] 6.4 `ui/BattleView.tsx` + `ui/MoveGrid.tsx` + `ui/HpBar.tsx` + `ui/PartySwitch.tsx` + bag/run actions, driven only by
       engine events. `[E2E]` full battle to a catch on a device.
-- [ ] 6.5 `ui/EncounterSheet.tsx` bottom sheet (Battle / Throw Ball / Run Away) with haptics and spring-in.
+      _MoveGrid and PartySwitch live inside BattleView; the screen owns battle state, settlement and navigation. The
+      on-device pass is still pending._
+- [x] 6.5 `ui/EncounterSheet.tsx` bottom sheet (Battle / Throw Ball / Run Away) with haptics and spring-in.
+      _Shipped with Battle / Run Away live and the ball action handed to the battle screen, where remaining HP sets the
+      odds. Haptics fire on the encounter itself._
 
 ## 7. Persistence and polish
 

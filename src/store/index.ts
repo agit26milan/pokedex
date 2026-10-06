@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { persist } from 'zustand/middleware';
 import { createStore, type StateCreator } from 'zustand/vanilla';
 
-import { createPartySlice, type PartySlice } from '@/features/party/store/partySlice';
+import { createPartySlice, INITIAL_BAG, type PartySlice } from '@/features/party/store/partySlice';
 import { createPokedexSlice, type PokedexSlice } from '@/features/pokedex/store/pokedexSlice';
 import { createWorldSlice, NEW_RUN_WORLD, type WorldSlice } from '@/features/world/store/worldSlice';
 import { STORE_VERSION, zustandStorage } from '@/shared/lib/storage';
@@ -24,8 +24,26 @@ export function freshRun(): Partial<RunState> {
     party: [],
     storage: [],
     leaderId: null,
+    bag: { ...INITIAL_BAG },
     ...NEW_RUN_WORLD,
   };
+}
+
+/** Shape check for anything coming back out of storage: a bad run must never crash the app. */
+export function isValidRun(value: unknown): value is Partial<RunState> {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<RunState>;
+  if (!Array.isArray(candidate.party) || !Array.isArray(candidate.storage)) return false;
+  if (typeof candidate.worldSeed !== 'number' || !Number.isFinite(candidate.worldSeed)) return false;
+  if (typeof candidate.position?.x !== 'number' || typeof candidate.position?.y !== 'number') return false;
+  if (!candidate.bag || typeof candidate.bag.pokeBall !== 'number' || typeof candidate.bag.potion !== 'number') return false;
+  return candidate.party.every((member) => typeof member?.id === 'number' && typeof member?.hp === 'number');
+}
+
+/** Exported so the fallback path is unit-tested rather than trusted. */
+export function mergePersisted(persisted: unknown, current: RunState): RunState {
+  if (!isValidRun(persisted)) return { ...current, ...freshRun() } as RunState;
+  return { ...current, ...persisted };
 }
 
 export const useStore = create<RunState>()(
@@ -48,6 +66,7 @@ export const useStore = create<RunState>()(
     }),
     migrate: (persisted, version) =>
       version === STORE_VERSION ? (persisted as RunState) : (freshRun() as RunState),
+    merge: mergePersisted,
   }),
 );
 
