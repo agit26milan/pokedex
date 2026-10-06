@@ -17,8 +17,9 @@ rather than a unit test.
 
 - [x] 2.1 Write `scripts/genSeed.ts`: fetch species + pokemon + move learnsets for ids 1-151 from PokéAPI, emit
       `src/shared/data/pokedex.gen1.json` (id, name, types, baseStats, evolution, 4 legal moves with power/accuracy/pp/class).
-- [ ] 2.2 Run it, commit the seed, and add a test asserting all 151 entries exist with valid types and at least one
-      damaging move each.
+- [x] 2.2 Run it, commit the seed, and add a test asserting all 151 entries exist with valid types and at least one
+      damaging move each. _Adjusted while doing it: 4 Gen-1 entries (abra, ditto, kakuna, metapod) genuinely have no
+      damaging level-up move, so the test locks that exact allowlist instead of pretending otherwise — see task 6.6._
 
 ## 3. Shared foundation
 
