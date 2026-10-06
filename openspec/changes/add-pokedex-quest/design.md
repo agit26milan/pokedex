@@ -123,6 +123,10 @@ Additional rules:
 - All styles created once with `StyleSheet.create` at module scope — no inline style objects inside `map()`.
 - `react-hooks/exhaustive-deps` is an error and must not be silenced without a written reason.
 - Every memoization has to be justified by a render-propagation path; blanket `memo`/`useMemo` is treated as a defect.
+- **Never put a non-route file under `app/`.** expo-router compiles every file in that directory into the route context,
+  so a `*.test.tsx` there drags Jest-only packages into the release bundle and fails `assembleRelease` with
+  `Unable to resolve module console from …@testing-library/react-native…`. Screen tests live in `src/` and import the
+  route they cover (`src/features/pokedex/ui/glossary-screen.test.tsx`).
 
 **Deviation from the draft:** a hold-to-repeat D-pad replaced the sketched analog stick. Grid movement is discrete, so a
 discrete control has fewer moving parts, works with screen readers, and removes drag-versus-tap ambiguity. Reanimated

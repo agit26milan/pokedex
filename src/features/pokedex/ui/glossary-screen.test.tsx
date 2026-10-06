@@ -1,11 +1,13 @@
 import { fireEvent, render } from '@testing-library/react-native';
 
+import GlossaryScreen from '../../../../app/(tabs)/glossary';
 import { createMember } from '@/features/party/store/partySlice';
 import { useStore } from '@/store';
-import GlossaryScreen from './glossary';
 
 const mockPush = jest.fn();
 
+// Lives outside app/ on purpose: expo-router bundles every file under app/ via require.context,
+// so a test file there drags @testing-library/react-native into the production bundle and breaks it.
 // babel-plugin-jest-hoist lifts these above the imports at runtime; the arrow only reads mockPush
 // when useRouter is called during render, so the source order is honest.
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
