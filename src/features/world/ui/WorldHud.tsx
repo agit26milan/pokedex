@@ -48,7 +48,7 @@ export function WorldHud({ partner, bag, steps, encounterRisk, chunkLabel }: Wor
 
       <View style={styles.metaRow}>
         <Text style={styles.pill}>{chunkLabel}</Text>
-        <Text style={styles.pill}>{steps} STEPS</Text>
+        <Text style={styles.pill}>{steps} {steps === 1 ? 'STEP' : 'STEPS'}</Text>
         <View style={styles.meter}>
           <View style={styles.meterLabels}>
             <Text style={styles.meterLabel}>ENCOUNTER RISK</Text>
