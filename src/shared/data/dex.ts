@@ -1,4 +1,8 @@
 import raw from './pokedex.gen1.json';
+import { isDamaging } from './moves';
+
+export { hasDamagingMove, MOVES, moveInfo, STRUGGLE } from './moves';
+export { isDamaging };
 
 export interface BaseStats {
   hp: number;
@@ -28,15 +32,12 @@ export interface MoveInfo {
 }
 
 export const POKEDEX = raw.pokemon as DexEntry[];
-export const MOVES = raw.moves as Record<string, MoveInfo>;
 export const DEX_SIZE = POKEDEX.length;
 export const ALL_TYPES: string[] = [...new Set(POKEDEX.flatMap((entry) => entry.types))].sort();
 
 const byId = new Map(POKEDEX.map((entry) => [entry.id, entry]));
 
 export const getEntry = (id: number): DexEntry | undefined => byId.get(id);
-
-export const isDamaging = (move: string): boolean => (MOVES[move]?.power ?? 0) > 0;
 
 /** Moves as of a level. Entries with no damaging move in Gen 1 keep their status-only list. */
 export const learnedBy = (entry: DexEntry, level: number): string[] =>
