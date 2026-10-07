@@ -20,6 +20,7 @@ import {
 import { sideSync } from '@/features/battle/logic/syncParty';
 import { BattleView, type BattlePanel } from '@/features/battle/ui/BattleView';
 import { createMember } from '@/features/party/store/partySlice';
+import { leadOf } from '@/features/party/logic/activeMember';
 import type { PartyMember } from '@/features/party/types';
 import { titleCase } from '@/shared/lib/format';
 import { mulberry32 } from '@/shared/lib/rng';
@@ -41,7 +42,7 @@ interface Settlement {
 function buildInitialBattle(wildId: number, level: number): BattleState | null {
   const foe = createSide(wildId, level);
   const { party, leaderId } = useStore.getState();
-  const lead = party.find((member) => member.id === leaderId) ?? party[0];
+  const lead = leadOf(party, leaderId);
   const player = lead ? sideFromMember(lead) : undefined;
   return foe && player ? { player, foe, turn: 0, outcome: 'ongoing' } : null;
 }

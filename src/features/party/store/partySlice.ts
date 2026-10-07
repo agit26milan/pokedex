@@ -78,7 +78,12 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
   },
 
   updateMember: (index, member) => {
-    set({ party: get().party.map((current, i) => (i === index ? member : current)) });
+    const { party, leaderId } = get();
+    const previous = party[index];
+    set({
+      party: party.map((current, i) => (i === index ? member : current)),
+      leaderId: previous && previous.id === leaderId ? member.id : leaderId,
+    });
   },
 
   setMemberHp: (index, hp) => {
