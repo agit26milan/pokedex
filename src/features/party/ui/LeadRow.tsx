@@ -26,7 +26,7 @@ export function LeadRow({ member, isLead, selected, onPress }: LeadRowProps) {
   const xp = xpProgress(member);
   const hpRatio = Math.max(0, Math.min(1, member.hp / Math.max(1, member.maxHp)));
   const fainted = member.hp <= 0;
-  const readout = `${titleCase(member.name)}${isLead ? ', lead saat ini' : ''}, level ${member.level}, combat rating ${combatRating}, grade ${grade}`;
+  const readout = `${titleCase(member.name)}${isLead ? ', current lead' : ''}, level ${member.level}, combat rating ${combatRating}, grade ${grade}`;
 
   return (
     <Pressable
@@ -35,7 +35,7 @@ export function LeadRow({ member, isLead, selected, onPress }: LeadRowProps) {
       accessibilityRole="button"
       accessibilityState={{ selected }}
       accessibilityLabel={readout}
-      accessibilityHint="Buka rincian kekuatan dan pilihan lead"
+      accessibilityHint="Open the strength details and lead options"
     >
       <View style={[styles.art, isLead && styles.artLead]}>
         <Sprite id={member.id} size={40} />

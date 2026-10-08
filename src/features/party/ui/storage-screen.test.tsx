@@ -42,9 +42,8 @@ describe('Storage screen', () => {
     seed(3, [151]);
     const view = await render(<StorageScreen />);
 
-    expect(view.getByLabelText('Slot party 4 kosong')).toBeTruthy();
+    expect(view.getByLabelText('Empty party slot 4')).toBeTruthy();
     expect(view.getByText('PARTY 3/6')).toBeTruthy();
-    expect(view.getByText('3 · TUKAR / PINDAH')).toBeTruthy();
   });
 
   it('offers to send the picked party member to storage', async () => {
@@ -53,7 +52,7 @@ describe('Storage screen', () => {
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
 
-    expect(view.getByLabelText('KIRIM CHARMANDER KE STORAGE')).toBeTruthy();
+    expect(view.getByLabelText('SEND CHARMANDER TO STORAGE')).toBeTruthy();
   });
 
   it('moves the picked member into storage and reports the new party size', async () => {
@@ -61,11 +60,11 @@ describe('Storage screen', () => {
     const view = await render(<StorageScreen />);
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
-    await fireEvent.press(view.getByLabelText('KIRIM CHARMANDER KE STORAGE'));
+    await fireEvent.press(view.getByLabelText('SEND CHARMANDER TO STORAGE'));
 
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 5, 6]);
     expect(ids(useStore.getState().storage)).toEqual([151, 4]);
-    expect(view.getByText('Charmander masuk storage · party tinggal 5/6.')).toBeTruthy();
+    expect(view.getByText('Charmander sent to storage · party now 5/6.')).toBeTruthy();
   });
 
   it('blocks the lead and explains why instead of failing later', async () => {
@@ -74,7 +73,7 @@ describe('Storage screen', () => {
 
     await fireEvent.press(view.getByLabelText('Bulbasaur, level 5, party slot 1, lead'));
 
-    expect(view.getByLabelText('LEAD TIDAK BISA DISIMPAN')).toBeTruthy();
+    expect(view.getByLabelText('LEAD CANNOT BE STORED')).toBeTruthy();
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 4, 5, 6]);
   });
 
@@ -83,11 +82,11 @@ describe('Storage screen', () => {
     const view = await render(<StorageScreen />);
 
     await fireEvent.press(view.getByLabelText('Mew, level 5, storage 1'));
-    await fireEvent.press(view.getByLabelText('TARIK MEW KE PARTY →'));
+    await fireEvent.press(view.getByLabelText('PULL MEW INTO PARTY →'));
 
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 4, 5, 151]);
     expect(ids(useStore.getState().storage)).toEqual([]);
-    expect(view.getByText('Mew masuk party · party 6/6.')).toBeTruthy();
+    expect(view.getByText('Mew joined the party · party 6/6.')).toBeTruthy();
   });
 
   it('turns a pull into a swap when the party is already full', async () => {
@@ -95,10 +94,10 @@ describe('Storage screen', () => {
     const view = await render(<StorageScreen />);
 
     await fireEvent.press(view.getByLabelText('Mew, level 5, storage 1'));
-    expect(view.getByLabelText('PARTY PENUH · PILIH SLOT PARTY')).toBeTruthy();
+    expect(view.getByLabelText('PARTY FULL · PICK A PARTY SLOT')).toBeTruthy();
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
-    await fireEvent.press(view.getByLabelText('TUKAR 2 POKÉMON'));
+    await fireEvent.press(view.getByLabelText('SWAP 2 POKÉMON'));
 
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 151, 5, 6]);
     expect(ids(useStore.getState().storage)).toEqual([4]);
@@ -110,7 +109,7 @@ describe('Storage screen', () => {
 
     await fireEvent.press(view.getByLabelText('Charmeleon, level 5, party slot 5'));
     await fireEvent.press(view.getByLabelText('Mew, level 5, storage 1'));
-    await fireEvent.press(view.getByLabelText('TUKAR 2 POKÉMON'));
+    await fireEvent.press(view.getByLabelText('SWAP 2 POKÉMON'));
 
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 4, 151, 6]);
     expect(ids(useStore.getState().storage)).toEqual([5]);
@@ -122,12 +121,12 @@ describe('Storage screen', () => {
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
     await fireEvent.press(view.getByLabelText('Mew, level 5, storage 1'));
-    expect(view.getByLabelText('TUKAR 2 POKÉMON')).toBeTruthy();
+    expect(view.getByLabelText('SWAP 2 POKÉMON')).toBeTruthy();
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
 
-    expect(view.queryByLabelText('TUKAR 2 POKÉMON')).toBeNull();
-    expect(view.getByLabelText('PARTY PENUH · PILIH SLOT PARTY')).toBeTruthy();
+    expect(view.queryByLabelText('SWAP 2 POKÉMON')).toBeNull();
+    expect(view.getByLabelText('PARTY FULL · PICK A PARTY SLOT')).toBeTruthy();
   });
 
   it('keeps the party side picked when the paired storage row is tapped again', async () => {
@@ -136,12 +135,12 @@ describe('Storage screen', () => {
 
     await fireEvent.press(view.getByLabelText('Mew, level 5, storage 1'));
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
-    expect(view.getByLabelText('TUKAR 2 POKÉMON')).toBeTruthy();
+    expect(view.getByLabelText('SWAP 2 POKÉMON')).toBeTruthy();
 
     await fireEvent.press(view.getByLabelText('Mew, level 5, storage 1'));
 
-    expect(view.queryByLabelText('TUKAR 2 POKÉMON')).toBeNull();
-    expect(view.getByLabelText('KIRIM CHARMANDER KE STORAGE')).toBeTruthy();
+    expect(view.queryByLabelText('SWAP 2 POKÉMON')).toBeNull();
+    expect(view.getByLabelText('SEND CHARMANDER TO STORAGE')).toBeTruthy();
   });
 
   it('re-targets the pair instead of clearing it when a different counterpart is tapped', async () => {
@@ -152,7 +151,7 @@ describe('Storage screen', () => {
     await fireEvent.press(view.getByLabelText('Pikachu, level 5, storage 1'));
 
     await fireEvent.press(view.getByLabelText('Charmeleon, level 5, party slot 5'));
-    await fireEvent.press(view.getByLabelText('TUKAR 2 POKÉMON'));
+    await fireEvent.press(view.getByLabelText('SWAP 2 POKÉMON'));
 
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 4, 25, 6]);
     expect(ids(useStore.getState().storage)).toEqual([5, 151]);
@@ -163,9 +162,9 @@ describe('Storage screen', () => {
     const view = await render(<StorageScreen />);
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
-    await fireEvent.press(view.getByLabelText('Batalkan pilihan'));
+    await fireEvent.press(view.getByLabelText('Clear the selection'));
 
-    expect(view.getByLabelText('PILIH POKÉMON DULU')).toBeTruthy();
+    expect(view.getByLabelText('PICK A POKÉMON FIRST')).toBeTruthy();
     expect(ids(useStore.getState().party)).toEqual([1, 2, 3, 4, 5, 6]);
   });
 
@@ -173,7 +172,7 @@ describe('Storage screen', () => {
     seed(6);
     const view = await render(<StorageScreen />);
 
-    expect(view.getByText('BELUM ADA YANG DITITIPKAN')).toBeTruthy();
+    expect(view.getByText('NOTHING STORED YET')).toBeTruthy();
     expect(view.getByText('STORAGE 0')).toBeTruthy();
   });
 });

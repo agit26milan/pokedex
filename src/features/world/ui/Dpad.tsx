@@ -34,7 +34,6 @@ export function Dpad({ onStep, sprint, onToggleSprint }: DpadProps) {
         >
           <Text style={[styles.sprintLabel, sprint && styles.sprintLabelOn]}>SPRINT ×2</Text>
         </Pressable>
-        <Text style={styles.hint}>TAP A GLOWING TILE{'\n'}OR HOLD AN ARROW</Text>
       </View>
     </View>
   );

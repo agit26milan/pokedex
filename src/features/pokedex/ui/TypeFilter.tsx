@@ -50,7 +50,7 @@ export function TypeFilter({ types, active, onToggle }: TypeFilterProps) {
 
 const styles = StyleSheet.create({
 
-  scroller: { height: 40, flexGrow: 0 },
+  scroller: { height: 40, flexGrow: 0, marginTop: spacing.md },
   row: { gap: 6, paddingHorizontal: spacing.lg, alignItems: 'center' },
   chip: {
     paddingHorizontal: 10,

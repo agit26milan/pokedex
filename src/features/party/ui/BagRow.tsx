@@ -15,7 +15,7 @@ interface BagRowProps {
 
 export const BagRow = memo(function BagRow({ item, name, effect, count, delta }: BagRowProps) {
   return (
-    <View style={styles.row} accessibilityLabel={`${name}, ${count} di tas`}>
+    <View style={styles.row} accessibilityLabel={`${name}, ${count} in bag`}>
       <ItemGlyph item={item} />
 
       <View style={styles.body}>

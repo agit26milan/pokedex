@@ -14,20 +14,20 @@ import { colors, font, radius, spacing } from '@/theme/tokens';
 
 const NAME: Record<BuyableItem, string> = { potion: 'Potion', hyperPotion: 'Hyper Potion', pokeBall: 'Poke Ball', greatBall: 'Great Ball' };
 
-export const BALL_EFFECT = 'LEMPAR DI BATTLE UNTUK MENANGKAP';
-export const GREAT_BALL_EFFECT = 'PELUANG TANGKAP LEBIH TINGGI';
+export const BALL_EFFECT = 'THROW IN BATTLE TO CATCH';
+export const GREAT_BALL_EFFECT = 'HIGHER CATCH CHANCE';
 
 const EFFECT: Record<BuyableItem, string> = {
-  potion: `+${POTION_HEAL} HP SAAT BATTLE · REVIVE ${Math.round(REVIVE_HP * 100)}% HP`,
-  hyperPotion: `+${HYPER_POTION_HEAL} HP SAAT BATTLE`,
+  potion: `+${POTION_HEAL} HP IN BATTLE · REVIVES AT ${Math.round(REVIVE_HP * 100)}% HP`,
+  hyperPotion: `+${HYPER_POTION_HEAL} HP IN BATTLE`,
   pokeBall: BALL_EFFECT,
   greatBall: GREAT_BALL_EFFECT,
 };
 
 const REFUSAL: Record<BuyRefusal, string> = {
-  money: 'Uang tidak cukup untuk jumlah itu — kurangi jumlahnya.',
-  qty: 'Jumlah harus 1 atau lebih.',
-  item: 'Item itu tidak dijual di toko.',
+  money: 'Not enough money for that quantity — lower the quantity.',
+  qty: 'Quantity must be at least 1.',
+  item: 'That item is not sold in the shop.',
 };
 
 
@@ -69,7 +69,7 @@ export default function BagsScreen() {
       setQty((current) => ({ ...current, [item]: 1 }));
       setLastBought({ item, qty: outcome.qty });
       setBubble({
-        text: `${outcome.qty} ${NAME[item].toUpperCase()} MASUK TAS · SISA $${wholeCoins(outcome.bag.money)}`,
+        text: `${outcome.qty} ${NAME[item].toUpperCase()} ADDED TO BAG · $${wholeCoins(outcome.bag.money)} LEFT`,
         tone: 'good',
       });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -81,11 +81,11 @@ export default function BagsScreen() {
 
   const rules = useMemo(() => {
     const chips: Chip[] = [
-      { text: 'UANG DARI MENANG BATTLE', tone: 'gold' },
+      { text: 'MONEY FROM WON BATTLES', tone: 'gold' },
       { text: `POTION $${priceOf('potion')} · HYPER $${priceOf('hyperPotion')}`, tone: 'ok' },
-      { text: 'POKE BALL DARI DROP', tone: 'plain' },
+      { text: 'POKE BALLS COME FROM DROPS', tone: 'plain' },
     ];
-    if (broke) chips.push({ text: 'UANG KURANG → TOMBOL SEBUT NOMINALNYA', tone: 'bad' });
+    if (broke) chips.push({ text: 'SHORT ON MONEY → THE BUTTON NAMES IT', tone: 'bad' });
     return chips;
   }, [broke]);
 
@@ -94,13 +94,12 @@ export default function BagsScreen() {
       <View style={styles.header}>
         <Text style={styles.eyebrow}>BAGS</Text>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>Tas &amp; Toko</Text>
-          <View style={[styles.money, broke && styles.moneyLow]} accessibilityLabel={`Uang ${coins}`}>
+          <Text style={styles.title}>Bag &amp; Shop</Text>
+          <View style={[styles.money, broke && styles.moneyLow]} accessibilityLabel={`Money ${coins}`}>
             <Text style={[styles.moneySym, broke && styles.moneyLowLabel]}>$</Text>
             <Text style={[styles.moneyValue, broke && styles.moneyLowLabel]}>{coins}</Text>
           </View>
         </View>
-        <Text style={styles.hint}>UANG DARI MENANG BATTLE · BELI POTION &amp; HYPER POTION DI BAWAH</Text>
       </View>
 
       {bubble ? (
@@ -111,9 +110,9 @@ export default function BagsScreen() {
 
       <ScrollView style={styles.body} contentContainerStyle={styles.bodyContent}>
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>ISI TAS</Text>
+          <Text style={styles.sectionLabel}>IN THE BAG</Text>
           <View style={styles.rule} />
-          <Text style={styles.sectionNote}>4 JENIS ITEM</Text>
+          <Text style={styles.sectionNote}>4 ITEM TYPES</Text>
         </View>
 
         <View style={styles.rows}>
@@ -136,9 +135,9 @@ export default function BagsScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>TOKO</Text>
+          <Text style={styles.sectionLabel}>SHOP</Text>
           <View style={styles.rule} />
-          <Text style={styles.sectionNote}>SISA ${coins}</Text>
+          <Text style={styles.sectionNote}>$${coins} LEFT</Text>
         </View>
 
         <View style={styles.rows}>
@@ -160,7 +159,7 @@ export default function BagsScreen() {
         </View>
 
         <View style={styles.legend}>
-          <Text style={styles.legendTitle}>ATURAN</Text>
+          <Text style={styles.legendTitle}>RULES</Text>
           {rules.map((chip) => (
             <View
               key={chip.text}

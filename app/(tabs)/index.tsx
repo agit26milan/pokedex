@@ -60,7 +60,7 @@ export default function PlayScreen() {
       const picked = useStore.getState().party.find((member) => member.id === id);
       swapLeader(id);
       setLeadTouched(true);
-      setLeadNotice(picked ? `${picked.name.toUpperCase()} jadi lead · turun pertama saat battle` : null);
+      setLeadNotice(picked ? `${picked.name.toUpperCase()} is the lead · steps in first in battle` : null);
     },
     [swapLeader],
   );
@@ -181,13 +181,6 @@ export default function PlayScreen() {
         encounterRisk={encounterRisk}
         chunkLabel={`CHUNK ${chunkOf(position.x)},${chunkOf(position.y)}`}
         isLead={partner ? partner.id === leaderId : false}
-        leadHint={
-          partner
-            ? leadTouched
-              ? `★ LEAD AKTIF · ${partner.name.toUpperCase()}`
-              : 'TAP KARTU → PARTY & LEAD'
-            : undefined
-        }
         onOpenParty={onOpenParty}
       />
       <View style={styles.stage}>

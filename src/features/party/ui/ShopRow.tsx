@@ -59,7 +59,7 @@ export const ShopRow = memo(function ShopRow({
             style={styles.key}
             accessibilityRole="button"
             accessibilityState={{ disabled: qty <= 1 }}
-            accessibilityLabel={`Kurangi jumlah ${name}`}
+            accessibilityLabel={`Decrease ${name} quantity`}
           >
             <Text style={[styles.keyLabel, qty <= 1 && styles.keyOff]}>−</Text>
           </Pressable>
@@ -72,7 +72,7 @@ export const ShopRow = memo(function ShopRow({
             style={styles.key}
             accessibilityRole="button"
             accessibilityState={{ disabled: atCeiling }}
-            accessibilityLabel={`Tambah jumlah ${name}`}
+            accessibilityLabel={`Increase ${name} quantity`}
           >
             <Text style={[styles.keyLabel, atCeiling && styles.keyOff]}>+</Text>
           </Pressable>
@@ -83,17 +83,17 @@ export const ShopRow = memo(function ShopRow({
           style={[styles.buy, affordable ? styles.buyReady : styles.buyShort]}
           accessibilityRole="button"
           accessibilityState={{ disabled: !affordable }}
-          accessibilityLabel={affordable ? `Beli ${qty} ${name} seharga $${total}` : `Uang kurang $${shortfall} untuk ${name}`}
+          accessibilityLabel={affordable ? `Buy ${qty} ${name} for $${total}` : `Short $${shortfall} for ${name}`}
         >
           <Text style={[styles.buyLabel, affordable ? styles.buyLabelReady : styles.buyLabelShort]}>
-            {affordable ? `BELI ${qty} · $${total}` : `UANG KURANG $${shortfall}`}
+            {affordable ? `BUY ${qty} · $${total}` : `SHORT $${shortfall}`}
           </Text>
         </Pressable>
       </View>
 
       {atCeiling || !affordable ? (
         <Text style={styles.maxNote}>
-          MAKS {maxQty} DENGAN ${coins} · 1 {name.toUpperCase()} ${price}
+          MAX {maxQty} WITH ${coins} · 1 {name.toUpperCase()} ${price}
         </Text>
       ) : null}
     </View>

@@ -48,7 +48,7 @@ export default function GlossaryScreen() {
             <Text style={styles.clearLabel}>CLEAR FILTERS</Text>
           </Pressable>
         ) : (
-          <Text style={styles.hint}>SEARCH NAME OR DEX NUMBER · TAP A TYPE TO FILTER</Text>
+          null
         )}
       </View>
 

@@ -31,9 +31,9 @@ export const PartySlotCard = memo(function PartySlotCard({
 }: PartySlotCardProps) {
   if (!member) {
     return (
-      <View style={styles.empty} accessibilityLabel={`Slot party ${index + 1} kosong`}>
+      <View style={styles.empty} accessibilityLabel={`Empty party slot ${index + 1}`}>
         <Text style={styles.emptyPlus}>＋</Text>
-        <Text style={styles.emptyLabel}>SLOT KOSONG</Text>
+        <Text style={styles.emptyLabel}>EMPTY SLOT</Text>
       </View>
     );
   }
@@ -55,7 +55,7 @@ export const PartySlotCard = memo(function PartySlotCard({
       accessibilityRole="button"
       accessibilityState={{ selected: state === 'selected' || state === 'victim' }}
       accessibilityLabel={`${name}, level ${member.level}, party slot ${index + 1}${isLead ? ', lead' : ''}`}
-      accessibilityHint="Pilih untuk dikirim ke storage, atau jadi penukar"
+      accessibilityHint="Pick to send to storage, or to swap in"
     >
       <View style={[styles.art, isLead && styles.leadArt]}>
         <Sprite id={member.id} size={32} />

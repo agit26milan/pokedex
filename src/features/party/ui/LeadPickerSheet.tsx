@@ -37,7 +37,7 @@ export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onCl
   const pick = (member: PartyMember, isLead: boolean) => {
     if (isLead) return;
     if (member.hp <= 0) {
-      setBlocked(`${titleCase(member.name)} pingsan — tidak ada potion untuk membangunkannya.`);
+      setBlocked(`${titleCase(member.name)} has fainted — no potion to revive them.`);
       return;
     }
     setBlocked(null);
@@ -47,7 +47,7 @@ export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onCl
 
   return (
     <View style={styles.overlay}>
-      <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Ketuk latar untuk tutup" />
+      <Pressable style={styles.scrim} onPress={onClose} accessibilityLabel="Tap the backdrop to close" />
       <View style={styles.sheet}>
         <View style={styles.handle} />
 
@@ -61,15 +61,15 @@ export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onCl
         <View style={styles.head}>
           <View style={styles.headText}>
             <Text style={styles.eyebrow}>PARTY · PICK LEAD</Text>
-            <Text style={styles.title}>Pilih Pokémon lead</Text>
-            <Text style={styles.sub}>Lead = yang turun pertama saat battle.</Text>
+            <Text style={styles.title}>Choose your lead</Text>
+            <Text style={styles.sub}>The lead steps in first in battle.</Text>
           </View>
           <Pressable
             onPress={onClose}
             hitSlop={8}
             style={styles.close}
             accessibilityRole="button"
-            accessibilityLabel="Tutup panel party"
+            accessibilityLabel="Close the party panel"
           >
             <Text style={styles.closeLabel}>✕</Text>
           </Pressable>
@@ -102,9 +102,9 @@ export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onCl
                         onPress={() => setOpenId(null)}
                         style={[styles.button, styles.ghost]}
                         accessibilityRole="button"
-                        accessibilityLabel="Batalkan pilihan"
+                        accessibilityLabel="Clear the selection"
                       >
-                        <Text style={styles.ghostLabel}>BATAL</Text>
+                        <Text style={styles.ghostLabel}>CANCEL</Text>
                       </Pressable>
                       <Pressable
                         onPress={() => pick(member, isLead)}
@@ -113,12 +113,12 @@ export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onCl
                         accessibilityState={{ disabled: isLead }}
                         accessibilityLabel={
                           isLead
-                            ? `${titleCase(member.name)} sudah menjadi lead`
-                              : `Jadikan ${titleCase(member.name)} lead`
+                            ? `${titleCase(member.name)} is already the lead`
+                              : `Make ${titleCase(member.name)} the lead`
                         }
                       >
                         <Text style={[styles.buttonLabel, isLead || member.hp <= 0 ? styles.heldLabel : styles.primaryLabel]}>
-                          {isLead ? 'SUDAH JADI LEAD' : '★ JADIKAN LEAD'}
+                          {isLead ? 'ALREADY THE LEAD' : '★ MAKE LEAD'}
                         </Text>
                       </Pressable>
                  

@@ -24,10 +24,10 @@ interface Bubble {
 }
 
 const REFUSAL: Record<RosterRefusal, (name: string) => string> = {
-  lead: (name) => `${name} adalah lead — ganti lead dulu di tab PLAY sebelum disimpan.`,
-  'last-one': () => 'Minimal 1 Pokémon harus tinggal di party.',
-  'party-full': () => `Party penuh ${PARTY_LIMIT}/${PARTY_LIMIT} — pilih satu slot party untuk ditukar.`,
-  missing: () => 'Pokémon itu sudah tidak ada di roster.',
+  lead: (name) => `${name} is the lead — change the lead in the PLAY tab first.`,
+  'last-one': () => 'At least 1 Pokémon must stay in the party.',
+  'party-full': () => `Party is full ${PARTY_LIMIT}/${PARTY_LIMIT} — pick a party slot to swap out.`,
+  missing: () => 'That Pokémon is no longer in the roster.',
 };
 
 const nameOf = (list: readonly PartyMember[], id: number): string => {
@@ -103,7 +103,7 @@ export default function StorageScreen() {
       return;
     }
     setSelection({ kind: 'none' });
-    cheer(`${label} masuk storage · party tinggal ${outcome.party.length}/${PARTY_LIMIT}.`);
+    cheer(`${label} sent to storage · party now ${outcome.party.length}/${PARTY_LIMIT}.`);
   }, [cheer, moveToStorage, party, selection]);
 
   const pull = useCallback(() => {
@@ -116,7 +116,7 @@ export default function StorageScreen() {
       return;
     }
     setSelection({ kind: 'none' });
-    cheer(`${label} masuk party · party ${outcome.party.length}/${PARTY_LIMIT}.`, 'info');
+    cheer(`${label} joined the party · party ${outcome.party.length}/${PARTY_LIMIT}.`, 'info');
   }, [cheer, moveToParty, selection, storage]);
 
   const swap = useCallback(() => {
@@ -129,61 +129,61 @@ export default function StorageScreen() {
       return;
     }
     setSelection({ kind: 'none' });
-    cheer(`${incoming} masuk party · ${outgoing} ke storage. Lead tetap ${nameOf(party, leaderId ?? -1)}.`, 'warn');
+    cheer(`${incoming} joined the party · ${outgoing} to storage. Lead stays ${nameOf(party, leaderId ?? -1)}.`, 'warn');
   }, [cheer, leaderId, party, selection, storage, swapWithStorage]);
 
   const action = useMemo(() => {
-    const base = { label: 'PILIH POKÉMON LAIN', tone: 'held' as const, disabled: true, run: clear };
+    const base = { label: 'PICK ANOTHER POKÉMON', tone: 'held' as const, disabled: true, run: clear };
     if (selection.kind === 'party') {
       const member = party.find((current) => current.id === selection.id);
       if (!member) return base;
       const label = titleCase(member.name);
-      if (member.id === leaderId) return { label: 'LEAD TIDAK BISA DISIMPAN', tone: 'held' as const, disabled: true, run: clear };
-      if (party.length <= 1) return { label: 'MINIMAL 1 TINGGAL DI PARTY', tone: 'held' as const, disabled: true, run: clear };
-      return { label: `KIRIM ${label.toUpperCase()} KE STORAGE`, tone: 'primary' as const, disabled: false, run: send };
+      if (member.id === leaderId) return { label: 'LEAD CANNOT BE STORED', tone: 'held' as const, disabled: true, run: clear };
+      if (party.length <= 1) return { label: 'AT LEAST 1 MUST STAY IN PARTY', tone: 'held' as const, disabled: true, run: clear };
+      return { label: `SEND ${label.toUpperCase()} TO STORAGE`, tone: 'primary' as const, disabled: false, run: send };
     }
     if (selection.kind === 'storage') {
       const label = nameOf(storage, selection.id).toUpperCase();
-      if (full) return { label: 'PARTY PENUH · PILIH SLOT PARTY', tone: 'held' as const, disabled: true, run: clear };
-      return { label: `TARIK ${label} KE PARTY →`, tone: 'info' as const, disabled: false, run: pull };
+      if (full) return { label: 'PARTY FULL · PICK A PARTY SLOT', tone: 'held' as const, disabled: true, run: clear };
+      return { label: `PULL ${label} INTO PARTY →`, tone: 'info' as const, disabled: false, run: pull };
     }
-    if (selection.kind === 'pair') return { label: 'TUKAR 2 POKÉMON', tone: 'warn' as const, disabled: false, run: swap };
-    if (party.length === 0) return { label: 'PARTY MASIH KOSONG', tone: 'held' as const, disabled: true, run: clear };
-    if (storage.length === 0) return { label: 'STORAGE MASIH KOSONG', tone: 'held' as const, disabled: true, run: clear };
-    return { label: 'PILIH POKÉMON DULU', tone: 'held' as const, disabled: true, run: clear };
+    if (selection.kind === 'pair') return { label: 'SWAP 2 POKÉMON', tone: 'warn' as const, disabled: false, run: swap };
+    if (party.length === 0) return { label: 'PARTY IS STILL EMPTY', tone: 'held' as const, disabled: true, run: clear };
+    if (storage.length === 0) return { label: 'STORAGE IS STILL EMPTY', tone: 'held' as const, disabled: true, run: clear };
+    return { label: 'PICK A POKÉMON FIRST', tone: 'held' as const, disabled: true, run: clear };
   }, [clear, full, leaderId, party, pull, selection, send, storage, swap]);
 
   const rules = useMemo(() => {
     if (selection.kind === 'pair') {
       return [
-        { text: `${nameOf(storage, selection.storageId).toUpperCase()} MASUK`, tone: 'good' as const },
-        { text: `${nameOf(party, selection.partyId).toUpperCase()} KELUAR`, tone: 'bad' as const },
-        { text: 'LEAD TIDAK IKUT', tone: 'plain' as const },
+        { text: `${nameOf(storage, selection.storageId).toUpperCase()} IN`, tone: 'good' as const },
+        { text: `${nameOf(party, selection.partyId).toUpperCase()} OUT`, tone: 'bad' as const },
+        { text: 'LEAD STAYS PUT', tone: 'plain' as const },
       ];
     }
     if (selection.kind === 'storage') {
       return full
         ? [
-            { text: 'PARTY PENUH → TUKAR', tone: 'bad' as const },
-            { text: 'TAP SLOT PARTY', tone: 'plain' as const },
+            { text: 'PARTY FULL → SWAP', tone: 'bad' as const },
+            { text: 'TAP A PARTY SLOT', tone: 'plain' as const },
           ]
         : [
-            { text: 'PARTY ADA RUANG → TARIK LANGSUNG', tone: 'good' as const },
-            { text: `SLOT KOSONG ${room}`, tone: 'plain' as const },
+            { text: 'PARTY HAS ROOM → PULL DIRECTLY', tone: 'good' as const },
+            { text: `${room} SLOTS FREE`, tone: 'plain' as const },
           ];
     }
     if (selection.kind === 'party') {
       return [
-        { text: '1 · PILIH POKÉMON', tone: 'good' as const },
-        { text: '2 · KONFIRMASI DI BAWAH', tone: 'plain' as const },
-        { text: 'LEAD TIDAK BISA DISIMPAN', tone: 'bad' as const },
+        { text: '1 · PICK A POKÉMON', tone: 'good' as const },
+        { text: '2 · CONFIRM BELOW', tone: 'plain' as const },
+        { text: 'LEAD CANNOT BE STORED', tone: 'bad' as const },
       ];
     }
     return [
-      { text: '1 · PILIH POKÉMON', tone: 'good' as const },
-      { text: '2 · TAP SLOT TUJUAN', tone: 'plain' as const },
-      { text: '3 · TUKAR / PINDAH', tone: 'plain' as const },
-      { text: 'LEAD SELALU DI PARTY', tone: 'bad' as const },
+      { text: '1 · PICK A POKÉMON', tone: 'good' as const },
+      { text: '2 · TAP THE TARGET SLOT', tone: 'plain' as const },
+      { text: '3 · SWAP / MOVE', tone: 'plain' as const },
+      { text: 'THE LEAD ALWAYS STAYS IN PARTY', tone: 'bad' as const },
     ];
   }, [full, party, room, selection, storage]);
 
@@ -211,7 +211,7 @@ export default function StorageScreen() {
             <Text style={styles.chipLabel}>CAUGHT {caught}</Text>
           </View>
         </View>
-        <Text style={styles.hint}>TAP 1 POKÉMON → LALU TAP SLOT TUJUAN</Text>
+        {/* <Text style={styles.hint}>TAP A POKÉMON → THEN TAP THE TARGET SLOT</Text> */}
       </View>
 
       {bubble ? <View style={styles.noticeWrap}><RosterNotice text={bubble.text} tone={bubble.tone} /></View> : null}
@@ -221,7 +221,7 @@ export default function StorageScreen() {
           <Text style={styles.sectionLabel}>PARTY</Text>
           <View style={styles.rule} />
           <Text style={[styles.sectionNote, full && styles.sectionNoteFull]}>
-            {full ? `PENUH ${party.length}/${PARTY_LIMIT}` : `${party.length}/${PARTY_LIMIT} · ${room} KOSONG`}
+            {full ? `FULL ${party.length}/${PARTY_LIMIT}` : `${party.length}/${PARTY_LIMIT} · ${room} FREE`}
           </Text>
         </View>
 
@@ -250,16 +250,16 @@ export default function StorageScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>STORAGE</Text>
           <View style={styles.rule} />
-          <Text style={styles.sectionNote}>{storage.length} POKÉMON · TANPA BATAS</Text>
+          <Text style={styles.sectionNote}>{storage.length} POKÉMON · NO LIMIT</Text>
         </View>
 
         {storage.length === 0 ? (
           <View style={styles.empty}>
             <Text style={styles.emptyBig}>▦</Text>
-            <Text style={styles.emptyTitle}>BELUM ADA YANG DITITIPKAN</Text>
+            <Text style={styles.emptyTitle}>NOTHING STORED YET</Text>
             <Text style={styles.emptyText}>
-              Catch baru masuk ke party selama party belum {PARTY_LIMIT}/{PARTY_LIMIT}. Selebihnya otomatis
-              dititipkan di sini — tetap terhitung sebagai CAUGHT di Glossary.
+              New catches join the party while there is room. The rest are stored here automatically —
+              they still count as CAUGHT in the Glossary.
             </Text>
           </View>
         ) : (
@@ -275,29 +275,6 @@ export default function StorageScreen() {
           </View>
         )}
 
-        <View style={styles.legend}>
-          <Text style={styles.legendTitle}>ATURAN</Text>
-          {rules.map((rule) => (
-            <View
-              key={rule.text}
-              style={[
-                styles.legendChip,
-                rule.tone === 'good' && styles.legendGood,
-                rule.tone === 'bad' && styles.legendBad,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.legendLabel,
-                  rule.tone === 'good' && styles.legendGoodLabel,
-                  rule.tone === 'bad' && styles.legendBadLabel,
-                ]}
-              >
-                {rule.text}
-              </Text>
-            </View>
-          ))}
-        </View>
       </ScrollView>
 
       <>
@@ -307,9 +284,9 @@ export default function StorageScreen() {
             onPress={clear}
             style={[styles.button, styles.ghost]}
             accessibilityRole="button"
-            accessibilityLabel="Batalkan pilihan"
+            accessibilityLabel="Clear the selection"
           >
-            <Text style={styles.ghostLabel}>BATAL</Text>
+            <Text style={styles.ghostLabel}>CANCEL</Text>
           </Pressable>
         ) : null}
         <Pressable
@@ -342,7 +319,7 @@ export default function StorageScreen() {
      {selection.kind === 'storage' && selection.id && (
       <View style={[styles.containerRemove]}>
       <Pressable onPress={removePokemon} style={[styles.buttonRemove]} >
-         <Text style={[styles.buttonLabel, styles.releaseLabel]} >Release Pokemon</Text>
+         <Text style={[styles.buttonLabel, styles.releaseLabel]} >Release Pokémon</Text>
        </Pressable>
       </View>
      )}

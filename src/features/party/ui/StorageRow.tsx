@@ -30,7 +30,7 @@ export const StorageRow = memo(function StorageRow({ member, index, state, onPre
       accessibilityRole="button"
       accessibilityState={{ selected: state === 'selected' }}
       accessibilityLabel={`${name}, level ${member.level}, storage ${index + 1}`}
-      accessibilityHint="Pilih untuk ditarik ke party"
+      accessibilityHint="Pick to pull into the party"
     >
       <View style={styles.art}>
         <Sprite id={member.id} size={32} />

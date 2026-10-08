@@ -38,13 +38,13 @@ describe('LeadPickerSheet', () => {
     const view = await render(
       <LeadPickerSheet visible={false} party={party} leaderId={ivysaur.id} onPick={jest.fn()} onClose={jest.fn()} />,
     );
-    expect(view.queryByText('Pilih Pokémon lead')).toBeNull();
+    expect(view.queryByText('Choose your lead')).toBeNull();
   });
 
   it('lists the whole party and marks the current lead', async () => {
     const { view } = await setup();
 
-    expect(view.getByText('Pilih Pokémon lead')).toBeTruthy();
+    expect(view.getByText('Choose your lead')).toBeTruthy();
     expect(view.getByText('Ivysaur')).toBeTruthy();
     expect(view.getByText('Kingler')).toBeTruthy();
     expect(view.getByText('Squirtle')).toBeTruthy();
@@ -65,7 +65,7 @@ describe('LeadPickerSheet', () => {
     const { view, onPick } = await setup();
 
     await fireEvent.press(view.getByLabelText(/^Kingler,/));
-    await fireEvent.press(view.getByLabelText('Jadikan Kingler lead'));
+    await fireEvent.press(view.getByLabelText('Make Kingler the lead'));
 
     expect(onPick).toHaveBeenCalledTimes(1);
     expect(onPick).toHaveBeenCalledWith(99);
@@ -76,8 +76,8 @@ describe('LeadPickerSheet', () => {
 
     await fireEvent.press(view.getByLabelText(/^Ivysaur,/));
 
-    expect(view.getByText('SUDAH JADI LEAD')).toBeTruthy();
-    await fireEvent.press(view.getByLabelText('Ivysaur sudah menjadi lead'));
+    expect(view.getByText('ALREADY THE LEAD')).toBeTruthy();
+    await fireEvent.press(view.getByLabelText('Ivysaur is already the lead'));
     expect(onPick).not.toHaveBeenCalled();
   });
 
@@ -86,10 +86,10 @@ describe('LeadPickerSheet', () => {
     expect(useStore.getState().bag.potion).toBe(1);
 
     await fireEvent.press(view.getByLabelText(/^Squirtle,/));
-    await fireEvent.press(view.getByLabelText('Jadikan Squirtle lead'));
+    await fireEvent.press(view.getByLabelText('Make Squirtle the lead'));
 
     expect(onPick).not.toHaveBeenCalled();
-    expect(view.getByText(/pingsan/i)).toBeTruthy();
+    expect(view.getByText(/has fainted/i)).toBeTruthy();
     expect(useStore.getState().bag.potion).toBe(1);
     expect(useStore.getState().party[2]!.hp).toBe(0);
   });
@@ -208,11 +208,11 @@ describe('LeadPickerSheet revive and heal', () => {
 describe('LeadPickerSheet dismissal', () => {
   it('closes from the close button and from the scrim', async () => {
     const first = await setup();
-    await fireEvent.press(first.view.getByLabelText('Tutup panel party'));
+    await fireEvent.press(first.view.getByLabelText('Close the party panel'));
     expect(first.onClose).toHaveBeenCalledTimes(1);
 
     const second = await setup();
-    await fireEvent.press(second.view.getByLabelText('Ketuk latar untuk tutup'));
+    await fireEvent.press(second.view.getByLabelText('Tap the backdrop to close'));
     expect(second.onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -222,12 +222,12 @@ describe('LeadPickerSheet dismissal', () => {
         visible
         party={party}
         leaderId={kingler.id}
-        notice="KINGLER jadi lead"
+        notice="KINGLER is the lead"
         onPick={jest.fn()}
         onClose={jest.fn()}
       />,
     );
 
-    expect(view.getByText('KINGLER jadi lead')).toBeTruthy();
+    expect(view.getByText('KINGLER is the lead')).toBeTruthy();
   });
 });

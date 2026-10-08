@@ -47,8 +47,8 @@ export function WorldHud({
           disabled={!onOpenParty}
           hitSlop={8}
           accessibilityRole="button"
-          accessibilityLabel="Buka party dan pilih lead"
-          accessibilityHint="Pilih Pokémon yang turun pertama saat battle"
+          accessibilityLabel="Open the party and pick a lead"
+          accessibilityHint="Pick the Pokémon that steps in first in battle"
         >
           {partner ? (
             <>
@@ -79,7 +79,7 @@ export function WorldHud({
         </Pressable>
 
         <View style={styles.kit}>
-          <Text style={[styles.chip, styles.chipMoney]} accessibilityLabel={`Uang ${Math.floor(bag.money)}`}>
+          <Text style={[styles.chip, styles.chipMoney]} accessibilityLabel={`Money ${Math.floor(bag.money)}`}>
             $ {Math.floor(bag.money)}
           </Text>
           {partner && onNewRun ? (
@@ -105,7 +105,6 @@ export function WorldHud({
       ) : null}
 
       <View style={styles.metaRow}>
-        <Text style={styles.pill}>{chunkLabel}</Text>
         <Text style={styles.pill}>{steps} {steps === 1 ? 'STEP' : 'STEPS'}</Text>
         <View style={styles.meter}>
           <View style={styles.meterLabels}>
