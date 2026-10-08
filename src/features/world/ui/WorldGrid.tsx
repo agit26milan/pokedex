@@ -15,10 +15,6 @@ import {
 } from '../logic/world';
 import { Tile } from './Tile';
 
-/**
- * Camera size in tiles. The tile size itself is measured from the screen, so the
- * framing stays the same on every device instead of showing more of the chunk.
- */
 const VIEW_COLS = 9;
 const VIEW_ROWS = 9;
 const MOVE_MS = 170;

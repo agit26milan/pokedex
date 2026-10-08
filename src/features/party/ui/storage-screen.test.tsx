@@ -126,7 +126,6 @@ describe('Storage screen', () => {
 
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
 
-    // Only the tapped party slot is dropped; the storage member stays selected and the party is still full.
     expect(view.queryByLabelText('TUKAR 2 POKÉMON')).toBeNull();
     expect(view.getByLabelText('PARTY PENUH · PILIH SLOT PARTY')).toBeTruthy();
   });
@@ -152,7 +151,6 @@ describe('Storage screen', () => {
     await fireEvent.press(view.getByLabelText('Charmander, level 5, party slot 4'));
     await fireEvent.press(view.getByLabelText('Pikachu, level 5, storage 1'));
 
-    // A different party member keeps the pair alive, just with a new victim.
     await fireEvent.press(view.getByLabelText('Charmeleon, level 5, party slot 5'));
     await fireEvent.press(view.getByLabelText('TUKAR 2 POKÉMON'));
 

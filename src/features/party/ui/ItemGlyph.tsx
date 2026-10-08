@@ -10,11 +10,6 @@ interface ItemGlyphProps {
   item: BuyableItem;
 }
 
-/**
- * Square icon frame shared by the bag and shop rows. Items with a sprite render the
- * image, the rest fall back to their glyph — so adding a new item only means editing
- * `itemMeta`, never these rows.
- */
 export const ItemGlyph = memo(function ItemGlyph({ item }: ItemGlyphProps) {
   const tone = ITEM_TONE[item];
   const image = ITEM_IMAGE[item];

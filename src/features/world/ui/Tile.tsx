@@ -15,7 +15,6 @@ const FILL: Record<TileType, string> = {
 interface TileProps {
   type: TileType;
   reachable: boolean;
-  /** Filled by the parent so the grid can scale to the screen. */
   size: number;
 }
 

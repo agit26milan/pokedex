@@ -18,7 +18,6 @@ beforeEach(() => {
   useStore.setState({ party, leaderId: ivysaur.id, bag: { ...INITIAL_BAG, potion: 1, hyperPotion: 0 } });
 });
 
-/** Which potions the bag holds. `hyperPotion` defaults to 0 so a test never silently drinks one. */
 interface Potions {
   potion?: number;
   hyperPotion?: number;
@@ -27,8 +26,6 @@ interface Potions {
 async function setup(list: PartyMember[] = party, leaderId: number | null = ivysaur.id, potions: Potions = { potion: 1 }) {
   const onPick = jest.fn();
   const onClose = jest.fn();
-  // The buttons write through the store and look members up by id, so the store has to
-  // hold the same roster that is rendered - otherwise a test would assert on a stale member.
   useStore.setState({ party: list, leaderId, bag: { ...INITIAL_BAG, potion: 0, hyperPotion: 0, ...potions } });
   const view = await render(
     <LeadPickerSheet visible party={list} leaderId={leaderId} onPick={onPick} onClose={onClose} />,

@@ -190,9 +190,6 @@ export default function BattleScreen() {
     router.back()
   }, [router]);
 
-  // `act` closes over `battle`, whose identity changes every turn. Handlers built straight from
-  // it would break the memo on every button each turn; a latest-ref keeps them stable so only the
-  // buttons whose own PP or label actually changed re-render.
   const actRef = useRef(act);
   useEffect(() => {
     actRef.current = act;

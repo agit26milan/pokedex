@@ -9,7 +9,10 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.agitafirstawan.pokedexquest"
+      "bundleIdentifier": "com.agitafirstawan.pokedexquest",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.agitafirstawan.pokedexquest",

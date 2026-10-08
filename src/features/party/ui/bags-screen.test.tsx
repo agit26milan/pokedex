@@ -26,7 +26,6 @@ describe('Bags screen', () => {
     expect(view.getByLabelText('Potion, 3 di tas')).toBeTruthy();
     expect(view.getByLabelText('Hyper Potion, 1 di tas')).toBeTruthy();
     expect(view.getByLabelText('Uang 132')).toBeTruthy();
-    // The description shows twice: once on the bag row, once on the matching shop row.
     expect(view.getAllByText(BALL_EFFECT).length).toBeGreaterThan(0);
   });
 
@@ -102,7 +101,6 @@ describe('Bags screen', () => {
     const view = await render(<BagsScreen />);
 
     expect(view.getByLabelText('Uang 0')).toBeTruthy();
-    // Even when every row is short, the label still says which item it belongs to.
     expect(view.getByLabelText('Uang kurang $10 untuk Potion')).toBeTruthy();
     expect(view.getByLabelText('Uang kurang $10 untuk Poke Ball')).toBeTruthy();
     expect(view.getByLabelText('Uang kurang $15 untuk Great Ball')).toBeTruthy();

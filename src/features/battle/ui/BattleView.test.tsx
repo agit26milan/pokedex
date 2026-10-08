@@ -9,7 +9,6 @@ jest.mock('@/shared/components/Sprite', () => ({ Sprite: () => null }));
 
 const BAG: Bag = { pokeBall: 5, greatBall: 0, potion: 2, hyperPotion: 0, money: 100 };
 
-/** A side whose move list is written by hand, so a test can pin the exact slot count. */
 const sideWith = (moves: string[]): BattleSide => ({
   ...createSide(16, 5)!,
   moves: moves.map((name, index) => ({ name, pp: index === 0 ? 0 : 10, maxPp: 10 })),
@@ -54,7 +53,6 @@ describe('BattleView move grid', () => {
     const { view } = await setup(sideWith(['tackle', 'ember', 'growl', 'scratch']));
 
     expect(view.getAllByTestId('grid-row')).toHaveLength(2);
-    // Three on the first row, so the lone fourth gets two spacers to keep the same card width.
     expect(view.getAllByTestId('grid-spacer')).toHaveLength(2);
     expect(view.getByLabelText('Use Scratch, 10 PP left')).toBeTruthy();
   });
@@ -88,7 +86,6 @@ describe('BattleView bag grid', () => {
     const { view } = await setup(sideWith(['tackle']), 'bag');
 
     expect(view.getAllByTestId('grid-row')).toHaveLength(2);
-    // Three on the first row (ball, great ball, potion), two on the second plus one spacer.
     expect(view.getAllByTestId('grid-spacer')).toHaveLength(1);
     expect(view.getByText('BACK')).toBeTruthy();
   });
@@ -100,7 +97,6 @@ describe('BattleView bag grid', () => {
       row.children.filter((child) => typeof child !== 'string' && child.props.testID !== 'grid-spacer').length,
     );
 
-    // A full trio then a pair, so no row ever carries more than three cards.
     expect(counts).toEqual([3, 2]);
   });
 

@@ -166,7 +166,6 @@ const MoveButton = memo(function MoveButton({ name, pp, onMove }: { name: string
   );
 });
 
-/** Cards flow three to a row; a fourth or fifth wraps instead of squeezing the cards above it. */
 const GRID_COLUMNS = 3;
 
 const chunk = <T,>(items: readonly T[], size: number): T[][] => {
@@ -175,10 +174,6 @@ const chunk = <T,>(items: readonly T[], size: number): T[][] => {
   return rows;
 };
 
-/**
- * Lays its children out up to `GRID_COLUMNS` per row. A short last row is padded with spacers so
- * its cards keep the same width as the rows above instead of stretching across the whole line.
- */
 function Grid({ children }: { children: ReactNode }) {
   const rows = chunk(Children.toArray(children), GRID_COLUMNS);
 

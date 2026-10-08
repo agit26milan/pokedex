@@ -3,7 +3,6 @@ import { levelFromXp, maxHpFor, statsAt, xpForLevel } from './stats';
 
 const bulbasaur = getEntry(1)!;
 
-/** A synthetic entry whose six base stats are all different, so a swapped field cannot hide. */
 const distinct = (): DexEntry => ({
   id: 1,
   name: 'test',
@@ -18,8 +17,6 @@ const STAT_KEYS = ['hp', 'attack', 'defense', 'specialAttack', 'specialDefense',
 
 describe('statsAt', () => {
   it('matches the Gen-1 formula for Bulbasaur at every milestone level', () => {
-    // hp   = floor(2 * base * level / 100) + level + 10
-    // rest = floor(2 * base * level / 100) + 5
     expect(statsAt(bulbasaur, 1)).toEqual({
       hp: 11,
       attack: 5,
@@ -55,7 +52,6 @@ describe('statsAt', () => {
   });
 
   it('routes each base stat into its own field', () => {
-    // Distinct bases mean a copy-paste slip (e.g. specialAttack fed by specialDefense) changes the result.
     expect(statsAt(distinct(), 100)).toEqual({
       hp: 130,
       attack: 45,
@@ -67,7 +63,6 @@ describe('statsAt', () => {
   });
 
   it('truncates the contribution instead of rounding it', () => {
-    // Bulbasaur level 5: hp 4.5 -> 4 (rounding would give 20 hp) and attack 4.9 -> 4 (would give 10).
     const level5 = statsAt(bulbasaur, 5);
     expect(level5.hp).toBe(19);
     expect(level5.attack).toBe(9);
@@ -78,7 +73,6 @@ describe('statsAt', () => {
     const high = statsAt(bulbasaur, 100);
 
     expect(high.hp - low.hp).toBe(189);
-    // attack/defence/speed share base 45-49, so pure base * 2 scaling applies to them.
     expect(high.attack - low.attack).toBe(98);
   });
 
@@ -98,7 +92,6 @@ describe('statsAt', () => {
       const before = statsAt(bulbasaur, level);
       const after = statsAt(bulbasaur, level + 1);
       for (const key of STAT_KEYS) expect(after[key]).toBeGreaterThanOrEqual(before[key]);
-      // HP strictly climbs because of the + level term.
       expect(after.hp).toBeGreaterThan(before.hp);
     }
   });

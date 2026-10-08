@@ -16,9 +16,6 @@ interface EvolutionMomentProps {
   onDone: () => void;
 }
 
-/**
- * The animation is decoration; the timer is what decides when the moment is over, so the sequence stays testable.
- */
 export function EvolutionMoment({ fromId, fromName, toId, toName, onDone }: EvolutionMomentProps) {
   const progress = useSharedValue(0);
   const [settled, setSettled] = useState(false);

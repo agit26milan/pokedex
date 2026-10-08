@@ -34,8 +34,14 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.inkDeep,
           borderTopColor: colors.stroke,
-          height: 66,
-          paddingTop: 8,
+          // No `height` on purpose: getTabBarHeight returns a numeric custom height *before* it reads
+          // `insets`, so pinning one makes the bar skip its safe-area arithmetic while the base style
+          // still applies `paddingBottom: insets.bottom`. The bar is then stuck at that number with
+          // the inset carved out of its own content box. Left undefined it is 49 + insets.bottom.
+          //
+          // No vertical padding either: the box is now exactly the platform height, which is sized for
+          // the library's own content (28px icon + 10px item padding + label). `paddingTop: 8` only
+          // fit because the pinned 66px box left slack, so it is spent from the content, not added to.
         },
         tabBarLabelStyle: { fontSize: 11, fontFamily: font.mono, letterSpacing: 1.5 },
       }}

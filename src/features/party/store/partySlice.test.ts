@@ -73,7 +73,6 @@ describe('reviveMember', () => {
 
   it('leaves whole-number HP behind', () => {
     const store = createRunStore();
-    // Bulbasaur at level 5 has an odd maximum (19), so an unrounded fraction would leave 9.5 HP.
     store.setState({
       party: [{ ...createMember(1, 5)!, hp: 0 }],
       leaderId: 1,

@@ -5,7 +5,6 @@ import { caughtIdsOf, createRunStore, freshRun } from './index';
 const store = () => createRunStore();
 const DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
 
-/** The spawn is always a path, so its neighbours depend entirely on the seed. */
 const neighbourType = (seed: number, from: Position, direction: Direction) => {
   const target = nextPosition(from, direction);
   return tileAt(seed, target.x, target.y);
@@ -97,7 +96,6 @@ describe('party slice', () => {
 describe('world slice', () => {
   it('walks one step and counts it', () => {
     const run = store();
-    // Exactly one step: walking all four directions in turn cancels out and lands back on the spawn.
     const direction = openAtSpawn(run.getState().worldSeed);
 
     expect(run.getState().walk(direction)).toBe(true);
@@ -107,8 +105,6 @@ describe('world slice', () => {
 
   it('refuses a step into water or rock and does not count it', () => {
     const run = store();
-    // The spawn is ringed by walkable tiles, so hunt for a tile that does border water
-    // or rock instead of assuming one sits next door.
     const edge = blockedEdge(run.getState().worldSeed);
 
     run.setState({ position: edge.from, steps: 3 });

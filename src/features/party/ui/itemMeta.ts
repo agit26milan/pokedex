@@ -2,7 +2,6 @@ import type { ImageSourcePropType } from 'react-native';
 
 import type { BuyableItem } from '../types';
 
-/** Colour family for an item row: the icon frame and the glyph both follow it. */
 export type BagTone = 'ball' | 'great' | 'potion' | 'hyper';
 
 export const ITEM_TONE: Record<BuyableItem, BagTone> = {
@@ -12,10 +11,6 @@ export const ITEM_TONE: Record<BuyableItem, BagTone> = {
   hyperPotion: 'hyper',
 };
 
-/**
- * Balls ship as sprites so the bag reads at a glance; potions keep the vector glyph.
- * Anything missing here falls back to `ITEM_GLYPH`.
- */
 export const ITEM_IMAGE: Partial<Record<BuyableItem, ImageSourcePropType>> = {
   pokeBall: require('@/assets/items/poke-ball.webp'),
   greatBall: require('@/assets/items/great-ball.webp'),
