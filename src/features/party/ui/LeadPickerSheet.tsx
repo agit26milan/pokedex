@@ -8,6 +8,7 @@ import { rankInParty } from '../logic/strength';
 import type { PartyMember } from '../types';
 import { LeadRow } from './LeadRow';
 import { StrengthPanel } from './StrengthPanel';
+import { useStore } from '@/store';
 
 interface LeadPickerSheetProps {
   visible: boolean;
@@ -21,13 +22,22 @@ interface LeadPickerSheetProps {
 export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onClose }: LeadPickerSheetProps) {
   const [openId, setOpenId] = useState<number | null>(null);
   const [blocked, setBlocked] = useState<string | null>(null);
-
+  const bag = useStore((state) => state.bag);
   if (!visible) return null;
+
+  const revive = (member: PartyMember) => {
+    if(!member.id) return
+    if(member.hp <= 0) {
+      useStore.getState().reviveMember(member.id)
+    } else {
+      useStore.getState().healMember(member.id)
+    }
+  };
 
   const pick = (member: PartyMember, isLead: boolean) => {
     if (isLead) return;
     if (member.hp <= 0) {
-      setBlocked(`${titleCase(member.name)} pingsan — heal dulu sebelum dijadikan lead.`);
+      setBlocked(`${titleCase(member.name)} pingsan — tidak ada potion untuk membangunkannya.`);
       return;
     }
     setBlocked(null);
@@ -104,15 +114,25 @@ export function LeadPickerSheet({ visible, party, leaderId, notice, onPick, onCl
                         accessibilityLabel={
                           isLead
                             ? `${titleCase(member.name)} sudah menjadi lead`
-                            : member.hp <= 0
-                              ? `${titleCase(member.name)} pingsan, tidak bisa dijadikan lead`
                               : `Jadikan ${titleCase(member.name)} lead`
                         }
                       >
                         <Text style={[styles.buttonLabel, isLead || member.hp <= 0 ? styles.heldLabel : styles.primaryLabel]}>
-                          {isLead ? 'SUDAH JADI LEAD' : member.hp <= 0 ? 'HEAL DULU' : '★ JADIKAN LEAD'}
+                          {isLead ? 'SUDAH JADI LEAD' : '★ JADIKAN LEAD'}
                         </Text>
                       </Pressable>
+                 
+                      {(bag.potion > 0 || bag.hyperPotion > 0) && (
+                          <Pressable
+                          onPress={() => revive(member)}
+                          style={[styles.button, styles.ghost]}
+                          accessibilityRole="button"
+                          accessibilityLabel="Revive member"
+                        >
+                          <Text style={styles.ghostLabel}>{member.hp <= 0 ? 'REVIVE' : 'HEAL'} </Text>
+                        </Pressable>
+                      )}
+                    
                     </View>
                   </>
                 ) : null}

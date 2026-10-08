@@ -5,6 +5,8 @@ import { maxPpOf } from '@/shared/data/moves';
 import { titleCase } from '@/shared/lib/format';
 import type { Bag, PartyMember } from '@/features/party/types';
 import { colors, font, radius, spacing } from '@/theme/tokens';
+import { xpForLevel } from '@/features/battle/logic/stats';
+import { XpBar } from '@/features/battle/ui/XpBar';
 
 interface WorldHudProps {
   partner: PartyMember | undefined;
@@ -34,7 +36,8 @@ export function WorldHud({
 
   const pp = partner ? partner.moves.reduce((total, slot) => total + slot.pp, 0) : 0;
   const maxPp = partner ? partner.moves.reduce((total, slot) => total + maxPpOf(slot.name), 0) : 0;
-
+  const xp = partner ? partner.xp : 0;
+  const maxXp = partner ? xpForLevel(partner.level + 1) : 0;
   return (
     <View style={styles.wrapper}>
       <View style={styles.row}>
@@ -68,6 +71,7 @@ export function WorldHud({
               <View style={styles.track}>
                 <View style={[styles.fill, { width: `${hpRatio * 100}%` }]} />
               </View>
+              <XpBar xp={xp - xpForLevel(partner.level)} maxXp={maxXp - xpForLevel(partner.level)} showNumbers />
             </>
           ) : (
             <Text style={styles.name}>No partner yet</Text>
@@ -75,8 +79,9 @@ export function WorldHud({
         </Pressable>
 
         <View style={styles.kit}>
-          <Text style={styles.chip}>◓ {bag.pokeBall}</Text>
-          <Text style={styles.chip}>✚ {bag.potion}</Text>
+          <Text style={[styles.chip, styles.chipMoney]} accessibilityLabel={`Uang ${Math.floor(bag.money)}`}>
+            $ {Math.floor(bag.money)}
+          </Text>
           {partner && onNewRun ? (
             <Pressable
               onPress={onNewRun}
@@ -169,7 +174,7 @@ const styles = StyleSheet.create({
   name: { color: colors.text, fontWeight: '800', fontSize: 13.5 },
   level: { color: colors.accent, fontFamily: font.mono, fontSize: 9.5, marginTop: 3 },
   levelEmpty: { color: colors.danger },
-  track: { height: 6, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.10)', overflow: 'hidden', marginTop: 8 },
+  track: { marginBottom: 8, height: 6, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.10)', overflow: 'hidden', marginTop: 8 },
   fill: { height: '100%', borderRadius: 99, backgroundColor: colors.accent },
   kit: { gap: 6, justifyContent: 'center', alignItems: 'flex-end' },
   newRun: {
@@ -191,6 +196,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.10)',
     overflow: 'hidden',
+  },
+  chipMoney: {
+    color: '#FFE9A8',
+    backgroundColor: 'rgba(255,215,94,0.10)',
+    borderColor: 'rgba(255,215,94,0.35)',
   },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   pill: {

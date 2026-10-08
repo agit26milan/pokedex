@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -26,6 +26,7 @@ import { titleCase } from '@/shared/lib/format';
 import { mulberry32 } from '@/shared/lib/rng';
 import { useStore } from '@/store';
 import { colors, font, radius, spacing } from '@/theme/tokens';
+import { getMoney } from '@/features/battle/logic/getMoney';
 
 const DEFAULT_WILD_ID = 16;
 const DEFAULT_WILD_LEVEL = 5;
@@ -64,15 +65,16 @@ export default function BattleScreen() {
   const [activeMemberId, setActiveMemberId] = useState<number | null>(leaderId ?? party[0]?.id ?? null);
   const [settlement, setSettlement] = useState<Settlement | null>(null);
   const [evolution, setEvolution] = useState<{ from: PartyMember; to: PartyMember; done: boolean } | null>(null);
-
   const rng = useRef(mulberry32(wildId * 7919 + wildLevel)).current;
   const settled = useRef(false);
 
   const mustSwitch = battle?.outcome === 'lost' && party.some((m) => m.hp > 0 && m.id !== activeMemberId);
 
+
   const settle = useCallback(
     (finished: BattleState, index: number, wasFaintWithReserve: boolean) => {
       const store = useStore.getState();
+      index = store.party.findIndex((member) => member.id === activeMemberId);
       if (index >= 0) store.updateMember(index, memberFromSide(store.party[index]!, finished.player));
       if (wasFaintWithReserve) return;
 
@@ -84,6 +86,7 @@ export default function BattleScreen() {
         const member = useStore.getState().party[index];
         const reward = member ? xpReward(finished.foe.level, member.level) : 0;
         const grown = member ? applyXp(member, reward) : null;
+        const money = getMoney(finished.foe.level, grown?.member.level ?? 0);
         if (grown) useStore.getState().updateMember(index, grown.member);
         const step = grown ? evolutionFor(grown.member.id, grown.member.level) : null;
         const next = grown && step ? evolveMember(grown.member, step) : null;
@@ -92,7 +95,7 @@ export default function BattleScreen() {
           setEvolution({ from: grown.member, to: next, done: false });
         }
         if (rng() < DROP_CHANCE) useStore.getState().grantItem(rng() < 0.5 ? 'potion' : 'pokeBall', 1);
-
+        useStore.getState().addMoney(money);
         const levels = grown?.levelsGained ? ` · now Lv ${grown.member.level}` : '';
         const learned = grown?.learned.length ? ` · learned ${grown.learned.map(titleCase).join(', ')}` : '';
         setSettlement({ outcome: 'won', text: `${reward} XP earned${levels}${learned}` });
@@ -116,7 +119,7 @@ export default function BattleScreen() {
       useStore.getState().healParty(0.5);
       setSettlement({ outcome: 'lost', text: 'Your Pokémon fainted. Back to the grass — they recovered a little.' });
     },
-    [rng],
+    [rng, activeMemberId],
   );
 
   const act = useCallback(
@@ -125,16 +128,15 @@ export default function BattleScreen() {
 
       const store = useStore.getState();
       const affordable =
-        action.kind === 'ball' ? store.bag[action.ball] > 0 : action.kind === 'item' ? store.bag.potion > 0 : true;
+        action.kind === 'ball' ? store.bag[action.ball] > 0 : action.kind === 'item' ? store.bag.potion > 0 || store.bag.hyperPotion > 0 : true;
       if (!affordable) {
         setEvents([{ kind: 'ball', text: 'Nothing left in the bag for that.' }]);
         return;
       }
-
       const resolved = resolveTurn(battle, action, rng);
 
       if (consumedFrom(resolved.events)) {
-        const spent = action.kind === 'ball' ? store.spendItem(action.ball) : action.kind === 'item' ? store.spendItem('potion') : true;
+        const spent = action.kind === 'ball' ? store.spendItem(action.ball) : action.kind === 'item' ? action.item === 'hyperPotion' ? store.spendItem('hyperPotion') : store.spendItem('potion') : true;
         if (!spent) return;
       }
 
@@ -165,14 +167,12 @@ export default function BattleScreen() {
     (member: PartyMember) => {
       const side = sideFromMember(member);
       if (!side) return;
-
       if (battle && activeMemberId !== null) {
-        const leavingIndex = party.findIndex((current) => current.id === activeMemberId);
+        const leavingIndex = party.findIndex((current) => current.id === member.id);
         if (leavingIndex >= 0) {
           useStore.getState().updateMember(leavingIndex, memberFromSide(party[leavingIndex]!, battle.player));
         }
       }
-
       settled.current = false;
       setActiveMemberId(member.id);
       setPanel('moves');
@@ -184,8 +184,25 @@ export default function BattleScreen() {
 
   const leave = useCallback(() => {
     useStore.getState().markEncounterResolved();
-    router.back();
+    if(!router.canGoBack()) {
+      router.replace('/');
+    }
+    router.back()
   }, [router]);
+
+  // `act` closes over `battle`, whose identity changes every turn. Handlers built straight from
+  // it would break the memo on every button each turn; a latest-ref keeps them stable so only the
+  // buttons whose own PP or label actually changed re-render.
+  const actRef = useRef(act);
+  useEffect(() => {
+    actRef.current = act;
+  }, [act]);
+
+  const pickMove = useCallback((move: string) => actRef.current({ kind: 'move', move }), []);
+  const throwBall = useCallback((ball: BallName) => actRef.current({ kind: 'ball', ball }), []);
+  const drinkPotion = useCallback(() => actRef.current({ kind: 'item', item: 'potion' }), []);
+  const drinkHyperPotion = useCallback(() => actRef.current({ kind: 'item', item: 'hyperPotion' }), []);
+  const runAway = useCallback(() => actRef.current({ kind: 'run' }), []);
 
   if (!battle) {
     return (
@@ -206,11 +223,12 @@ export default function BattleScreen() {
         panel={mustSwitch ? 'party' : panel}
         catchChance={foeCaptureChance(battle.foe, 'pokeBall')}
         onPanel={setPanel}
-        onMove={(move) => act({ kind: 'move', move })}
-        onBall={(ball: BallName) => act({ kind: 'ball', ball })}
-        onPotion={() => act({ kind: 'item', item: 'potion' })}
+        onMove={pickMove}
+        onBall={throwBall}
+        onPotion={drinkPotion}
+        onHyperPotion={drinkHyperPotion}
         onSwitch={switchTo}
-        onRun={() => act({ kind: 'run' })}
+        onRun={runAway}
       />
 
       {mustSwitch ? (

@@ -57,8 +57,8 @@ export async function getEnrichedDetail(id: number): Promise<FetchResult<Enriche
 
 function pickEnglishFlavor(species: RawSpecies): string | null {
   const english = species.flavor_text_entries.filter((entry) => entry.language.name === 'en');
-  const red = english.find((entry) => entry.version.name === 'red');
-  const chosen = red ?? english[0];
+  const blue = english.find((entry) => entry.version.name === 'blue');
+  const chosen = blue ?? english[0];
   if (!chosen) return null;
   return chosen.flavor_text.replace(/[\n\f\r]/g, ' ').replace(/\s+/g, ' ').trim();
 }

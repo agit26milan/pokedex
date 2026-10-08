@@ -40,7 +40,8 @@ export type BattleAction =
   | { kind: 'switch'; to: BattleSide }
   | { kind: 'item'; item: 'potion' }
   | { kind: 'ball'; ball: BallName }
-  | { kind: 'run' };
+  | { kind: 'run' }
+  | { kind: 'item'; item: 'hyperPotion' };
 
 export interface BattleEvent {
   kind: 'move' | 'miss' | 'nopp' | 'faint' | 'switch' | 'item' | 'ball' | 'run';
@@ -55,6 +56,7 @@ export interface BattleEvent {
 
 export const BALL_BONUS: Record<BallName, number> = { pokeBall: 1, greatBall: 1.5 };
 export const POTION_HEAL = 20;
+export const HYPER_POTION_HEAL = 60;
 export const RUN_SUCCESS_RATE = 0.8;
 
 function damagingMoves(side: BattleSide): string[] {
@@ -154,7 +156,9 @@ export function resolveTurn(state: BattleState, action: BattleAction, rng: Rng):
   }
 
   if (action.kind === 'item') {
-    const healed = Math.min(POTION_HEAL, player.maxHp - player.hp);
+    let type = action.item === 'potion' ? POTION_HEAL : HYPER_POTION_HEAL;
+    const healed = Math.min(type, player.maxHp - player.hp);
+    console.log(healed, 'healed')
     player = { ...player, hp: player.hp + healed };
     events.push({ kind: 'item', consumed: true, text: `${player.name} recovered ${healed} HP.` });
   }
