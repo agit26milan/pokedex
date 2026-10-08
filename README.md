@@ -21,15 +21,63 @@ fight what you find, catch it, and watch it show up in the Glossary.
 
 Progress survives a reload. A half-finished battle deliberately does not.
 
-## Run it
+## Requirements
+
+No account, no API key and no environment variable: the game reads a bundled data snapshot, and PokéAPI is only
+touched by `npm run seed` and the glossary detail enrichment.
+
+| Need | Version | For |
+| --- | --- | --- |
+| Node.js | `20.19.4+` · `22.13+` · `24.3+` · `25+` — what `react-native@0.86.3` declares in its own `engines` field | everything |
+| npm | 10+ (comes with Node 20) | install and scripts |
+| OS | macOS, Linux or Windows | Expo Go works from any of them; the local-Android scripts here assume macOS |
+| Expo Go app | current version, iOS or Android | the 30-second path, no dev build |
+| Phone + laptop on the same Wi-Fi | — | so the QR code can reach Metro |
+| JDK 17 + Android SDK | Temurin 17, `platforms;android-36`, `build-tools;36.0.0` | **only** for local APK builds and the emulator |
+| Android emulator + AVD | `system-images;android-36;google_apis;arm64-v8a`, AVD named `pokedex` | **only** for `npm run emulator` / `npm run e2e:android` |
+
+Checked on Node 25.9.0 / npm 11.12.1, macOS on Apple silicon, against an Android 36 arm64 emulator.
+
+## Install and run
 
 ```bash
-npm install
-npm start          # then scan the QR code with Expo Go, or press a / i
+git clone <this repo> && cd pokemon
+npm install        # no native build step, no credentials
+npm start          # Metro + a QR code
 ```
+
+Then pick a target:
+
+| Target | Command | Needs |
+| --- | --- | --- |
+| **Expo Go (fastest)** | scan the QR with Expo Go, or press `a` / `i` for a booted emulator or simulator | nothing but Node |
+| Emulator, existing release APK | `npm run emulator` | an APK in `dist/` and an AVD named `pokedex`; `npm run emulator -- --debug` builds a debug APK and starts Metro instead |
+| Emulator, from source | `npm run android` | the JDK 17 + SDK pair |
+| iOS simulator | `npm run ios` | Xcode |
+| Cloud build | `npm run android:apk` (`eas build -p android --profile preview`) | an Expo account; `eas.json` carries development / simulator / preview / production |
 
 Expo Go compatibility is a hard requirement here: the reviewer should be playing 30 seconds after
 `npm install`, without a dev build.
+
+Missing the JDK/SDK? `bash scripts/setup-local-android.sh` installs both under `~/Library/Java` and
+`~/Library/Android/sdk` without `sudo` (macOS, Apple silicon) and prints the exports for `~/.zshrc`. It does
+**not** install the emulator or a system image — for those:
+
+```bash
+sdkmanager --install emulator 'system-images;android-36;google_apis;arm64-v8a'
+avdmanager create avd -n pokedex -k 'system-images;android-36;google_apis;arm64-v8a'
+```
+
+## Troubleshooting
+
+| Symptom | Fix |
+| --- | --- |
+| QR scans but the app cannot reach Metro | phone and laptop on one network, or `npx expo start --tunnel` |
+| `Port 8081 is running this app in another window` | `npx expo start --port 8082`, or stop the other Metro |
+| `emulator: command not found` | `sdkmanager --install emulator` — the setup script does not do this |
+| Gradle fails with a Java version error | point `JAVA_HOME` at `temurin-17.jdk` — the JDK every script here exports, and the only one this was built with |
+| Strange resolve errors after a dependency bump | `npx expo-doctor`, then `npm ci` |
+| Suspect a rule is broken | `npm test` — 352 tests pin the rules before you debug a screen |
 
 ## Verify it
 
