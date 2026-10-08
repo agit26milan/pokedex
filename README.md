@@ -15,6 +15,9 @@ fight what you find, catch it, and watch it show up in the Glossary.
 4. Catch it and it joins your party — or your storage if you already have six. Either way it counts
    as caught in the **Glossary**, which lists all 151 Gen-1 Pokémon with search (name or `#025`)
    and multi-select type filters.
+5. Coins won in battle are spent in the **Bags** tab: potion 10, hyper potion 20, Poké Ball 10,
+   Great Ball 15. The **Storage** tab moves a Pokémon between the bench and the party, and it refuses
+   the two moves that would break a run — sending the lead away, or emptying the party.
 
 Progress survives a reload. A half-finished battle deliberately does not.
 
@@ -33,7 +36,7 @@ Expo Go compatibility is a hard requirement here: the reviewer should be playing
 ```bash
 npm run typecheck  # tsc --noEmit
 npm run lint       # eslint, react-hooks/exhaustive-deps is an error
-npm test           # 133 unit tests across 16 suites
+npm test           # 352 unit tests across 42 suites
 npm run seed       # regenerate src/shared/data/pokedex.gen1.json from PokéAPI (opt-in)
 ```
 
@@ -73,6 +76,10 @@ cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a
 | Self-contained | `assets/index.android.bundle` (3.2 MB) is embedded in both, so they run with Metro stopped and no network |
 | SHA-256 | universal `f6ce8271b0e16f130de6352cb558d924e9e364493e8636ab735bdec90e5764e8`, arm64 `49678785289b7e55ddfaa38145f49c17981f6370ee04646dfe2adc3f756eb7f3` |
 
+> Those two files were produced on 7 Oct 00:42–00:43, i.e. **before** the Storage/Bags tabs and the battle grass
+> landed: neither bundle contains `BAGS`, `StorageRow` or `ShopRow`. `bash scripts/build-apks.sh` rebuilds both in
+> one go, copies them into `dist/` and prints the new hashes, so this table can be refreshed.
+
 Verified by inspecting the produced file (`aapt2 dump badging`, `unzip -l`), not by assuming the build
 succeeded, and launched on an emulator (see task 9.7 in the OpenSpec change). Test files live under
 `src/`, never under `app/`: expo-router compiles every file in `app/` into the route context, so a test
@@ -81,16 +88,21 @@ there breaks the release bundle.
 ## Layout
 
 ```
-app/                        expo-router routes (tabs: Play, Glossary) + battle + pokemon/[id]
+app/                        expo-router routes — tabs PLAY, STORAGE, BAGS, GLOSSARY — plus battle + pokemon/[id]
 src/
   features/
-    world/    logic/  generateChunk, movePlayer, rollEncounter, rollWild   ui/  WorldGrid, Tile, Dpad, WorldHud, EncounterSheet
-    battle/   logic/  damage, typeChart, catchRate, turnEngine, levelUp, createSide, stats
-              ui/     BattleView, HpBar
-    party/    logic/  partyRules                                            ui/  PartnerPicker
+    world/    logic/  world (chunkOf, tileAt, isBlocked, nextPosition), rollEncounter, rollWild
+              ui/     WorldGrid, Tile, Dpad, WorldHud, EncounterSheet
+    battle/   logic/  damage, typeChart, catchRate, turnEngine, levelUp, createSide, stats, evolve,
+                      getMoney, syncParty, worldThrow
+              ui/     BattleView, HpBar, XpBar, EvolutionMoment, GrassField
+    party/    logic/  partyRules, shop, strength, activeMember
+              ui/     PartnerPicker, LeadPickerSheet, LeadRow, StrengthPanel, PartySlotCard,
+                      StorageRow, BagRow, ShopRow, ItemGlyph, itemMeta, RosterNotice
               store/  partySlice                                           types.ts
     pokedex/  logic/  filterPokemon                                         ui/  PokemonList, PokemonRow, SearchBar, TypeFilter
               store/  pokedexSlice
+    shell/    ui/     tabs-layout.test.tsx (the bar itself lives in app/(tabs)/_layout.tsx)
   store/                    composes the slices, persist + validation
   shared/       api/ axios client + cached enrichment
                 components/ Sprite, TypeBadge
@@ -106,7 +118,10 @@ read one folder instead of hunting through `components/` and `hooks/`. Each feat
 ## State
 
 One zustand store over three slices — `party`, `world`, `pokedex` — persisted to AsyncStorage with a
-version and a shape check: a corrupt or stale payload falls back to a fresh run instead of crashing.
+version, a migration chain and a shape check: a corrupt or stale payload falls back to a fresh run
+instead of crashing. v1→v2 gives every persisted move a PP slot; v2→v3 fills in a bag that a v2 save
+never had. The party, the storage, the bag (balls, potions, coins) and the lead id are all part of the
+persisted run.
 
 Battle state is **not** in the store. The screen owns it with a lazy `useState`, which makes "a reload
 never restores a half-finished battle" true by construction rather than by a `partialize` allowlist.
@@ -125,6 +140,10 @@ Anything derivable is derived: "caught" is `party ∪ storage`, never a second c
 | Level up | automatic, learns moves up to 4 | the spec asks for no prompt |
 | Evolution | level triggers only, at the end of a won battle | the data carries stones and trades too, but the game has neither |
 | Struggle | fallback for Abra/Ditto/Metapod/Kakuna | without it a player could field a Pokémon that can never win |
+| Money | `floor(foe level / winner level × 10 + 10)` | a win pays something even against a much weaker foe |
+| Shop | potion 10 · hyper potion 20 · Poké Ball 10 · Great Ball 15 | prices live in `party/types.ts`; the screen only reads them |
+| Potions | restore 50% of max HP, and on a fainted member the same item is the revive | there is no Pokémon Centre, so an item has to be the recovery path |
+| Storage | refuses the two moves that break a run — the lead, and the last party member | the party can never be emptied or left leaderless |
 
 Damage follows the Gen-1 formula with STAB, a critical chance and the full modern 18-type chart —
 Gen-1 species already carry Fairy/Steel typing (Clefairy, Magnemite), so a 15-type chart would
@@ -152,8 +171,12 @@ The rules were treated as acceptance criteria, not decoration:
 
 - The world renders a 20×20 chunk as **memoized tiles with stable keys**; moving animates the camera
   with a Reanimated shared value on the UI thread, so a step never re-renders 400 tiles.
-- `Sprite`, `TypeBadge`, `PokemonRow`, `Tile` and the move buttons are `memo` with primitive props and
-  callback props held stable by `useCallback` — that is the point of memoizing them.
+- The battle's tall grass is 41 blades in four depth bands driven by **two shared clocks** — it animates
+  `transform` and `opacity` only, honours `ReduceMotion.System`, and cancels on `AppState` background so a
+  suspended app is never animating.
+- `Sprite`, `TypeBadge`, `PokemonRow`, `Tile`, the move buttons and the rows added later (`StorageRow`,
+  `ShopRow`, `BagRow`, `ItemGlyph`, `PartySlotCard`) are `memo` with primitive props and callback props
+  held stable by `useCallback` — that is the point of memoizing them.
 - `useMemo` appears exactly twice in the list screen, for work that is real: filtering 151 entries and
   building the caught-id `Set`.
 - `react-hooks/exhaustive-deps` is an error, and it is satisfied by construction: the battle screen's mount guard
@@ -161,20 +184,25 @@ The rules were treated as acceptance criteria, not decoration:
 
 ## Comments
 
-The code carries no comments by request. That is a policy, not an omission: the reasoning that would otherwise sit
-next to the code lives in the OpenSpec change documents (`openspec/changes/*/design.md`), in `README.md`, and in
-`design/io-flow.md` for the data flow. Every non-obvious rule — the damage formula, why a switch must persist the
-outgoing member, why an item is only spent once the engine reports it consumed, why PP refills on level up — has a
-named home there, and the tests pin the behaviour.
+Comments are the exception, and where they exist they are load-bearing: eight lines in `app/(tabs)/_layout.tsx`
+explain why the tab bar must not pin a `height` or a `paddingTop` — the library resolves the safe-area inset *after*
+a custom height, so a pinned bar spends the inset out of its own content box. Everywhere else the reasoning that
+would otherwise sit next to the code lives in the OpenSpec change documents (`openspec/changes/*/design.md`), in
+`README.md`, and in the `design/` mockups. Every non-obvious rule — the damage formula, why a switch must persist
+the outgoing member, why an item is only spent once the engine reports it consumed, why PP refills on level up — has
+a named home there, and the tests pin the behaviour.
 
 ## Testing
 
-187 unit tests: seeded RNG, chunk determinism and blocked movement, the encounter guarantee and rate,
-party overflow into storage, the type chart, damage monotonicity and crits, the damage class picking
-the right stat pair, catch odds, the full turn engine (order, miss, PP rejection, switch cost, faint,
-run, determinism), that a switch keeps the outgoing member's HP and PP, that an item is only consumed
-when it does something, XP and level-up move learning, persisted PP and the v1 to v2 save upgrade,
-glossary filtering, world ball throws, the new-run wipe, and the corrupt-storage fallback.
+352 unit tests across 42 suites: seeded RNG, chunk determinism and blocked movement, the encounter
+guarantee and rate, party overflow into storage, the type chart, damage monotonicity and crits, the
+damage class picking the right stat pair, catch odds, the full turn engine (order, miss, PP rejection,
+switch cost, faint, run, determinism), that a switch keeps the outgoing member's HP and PP, that an
+item is only consumed when it does something, XP and level-up move learning, persisted PP, the v1→v2
+and v2→v3 save upgrades, shop purchases (out of money, bad quantity, unknown item), potion healing and
+revive, moving a member to storage and back including the refusals, money per win, evolution, glossary
+filtering, the Bags and Storage screens, the tab bar layout, world ball throws, the grass field, the
+new-run wipe, and the corrupt-storage fallback.
 
 Everything that decides an outcome is pure with an injected RNG, so a battle can be replayed exactly
 in a test. `logic/` folders contain no React and no AsyncStorage.
