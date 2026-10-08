@@ -17,7 +17,7 @@ export interface WorldSlice {
   markFirstEncounterDone: () => void;
 }
 
-export const DEFAULT_WORLD_SEED = 1_013_1987;
+export const DEFAULT_WORLD_SEED = 5_013_1987;
 export const NEW_RUN_WORLD = {
   worldSeed: DEFAULT_WORLD_SEED,
   position: SPAWN,

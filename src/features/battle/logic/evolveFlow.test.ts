@@ -4,7 +4,6 @@ import { evolveMember, evolutionFor } from './evolve';
 import { applyXp } from './levelUp';
 import { xpForLevel } from './stats';
 
-/** Exactly what the battle screen does with a reward: grow the member, then ask if an evolution is due. */
 const afterReward = (member: PartyMember, reward: number): PartyMember => {
   const grown = applyXp(member, reward);
   const step = evolutionFor(grown.member.id, grown.member.level);

@@ -3,7 +3,7 @@ import { createJSONStorage } from 'zustand/middleware';
 
 export const zustandStorage = createJSONStorage(() => AsyncStorage);
 
-export const STORE_VERSION = 2;
+export const STORE_VERSION = 3;
 
 export const CACHE_PREFIX = 'pokedex-quest/cache/';
 export const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000;

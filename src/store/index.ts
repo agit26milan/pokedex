@@ -57,9 +57,15 @@ const upgradeRunV1 = (value: unknown): unknown => {
   };
 };
 
+const upgradeBagV2 = (value: unknown): unknown => {
+  if (!isRecord(value)) return value;
+  return { ...value, bag: { ...INITIAL_BAG, ...(isRecord(value.bag) ? value.bag : {}) } };
+};
+
 export function migratePersisted(persisted: unknown, version: number): unknown {
   if (version >= STORE_VERSION) return persisted;
   if (version === 1) return upgradeRunV1(persisted);
+  if (version === 2) return upgradeBagV2(persisted);
   return freshRun();
 }
 
@@ -81,7 +87,8 @@ export function isValidRun(value: unknown): value is Partial<RunState> {
 
 export function mergePersisted(persisted: unknown, current: RunState): RunState {
   if (!isValidRun(persisted)) return { ...current, ...freshRun() } as RunState;
-  return { ...current, ...persisted };
+  const merged = { ...current, ...persisted } as RunState;
+  return { ...merged, bag: { ...INITIAL_BAG, ...merged.bag } };
 }
 
 export const useStore = create<RunState>()(

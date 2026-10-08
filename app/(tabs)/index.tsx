@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { throwBall } from '@/features/battle/logic/worldThrow';
 import { PartnerPicker } from '@/features/party/ui/PartnerPicker';
+import { LeadPickerSheet } from '@/features/party/ui/LeadPickerSheet';
 import { createMember } from '@/features/party/store/partySlice';
 import { Dpad } from '@/features/world/ui/Dpad';
 import { EncounterSheet } from '@/features/world/ui/EncounterSheet';
@@ -31,11 +32,38 @@ export default function PlayScreen() {
   const encounterRisk = useStore((state) => state.encounterRisk);
   const pendingEncounter = useStore((state) => state.pendingEncounter);
   const choosePartner = useStore((state) => state.choosePartner);
+  const leaderId = useStore((state) => state.leaderId);
+  const swapLeader = useStore((state) => state.swapLeader);
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [sprint, setSprint] = useState(false);
   const [wild, setWild] = useState<WildEncounter | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [leadSheet, setLeadSheet] = useState(false);
+  const [leadNotice, setLeadNotice] = useState<string | null>(null);
+  const [leadTouched, setLeadTouched] = useState(false);
+
+  useEffect(() => {
+    if (!leadNotice) return;
+    const timer = setTimeout(() => setLeadNotice(null), 2400);
+    return () => clearTimeout(timer);
+  }, [leadNotice]);
+
+  const onOpenParty = useCallback(() => setLeadSheet(true), []);
+  const onCloseParty = useCallback(() => {
+    setLeadSheet(false);
+    setLeadNotice(null);
+  }, []);
+
+  const onPickLead = useCallback(
+    (id: number) => {
+      const picked = useStore.getState().party.find((member) => member.id === id);
+      swapLeader(id);
+      setLeadTouched(true);
+      setLeadNotice(picked ? `${picked.name.toUpperCase()} jadi lead · turun pertama saat battle` : null);
+    },
+    [swapLeader],
+  );
 
   const onNewRun = useCallback(() => {
     const state = useStore.getState();
@@ -61,8 +89,7 @@ export default function PlayScreen() {
   }, []);
 
   const rng = useRef(mulberry32(worldSeed)).current;
-  const partner = party[0];
-
+  const partner = party.find((member) => member.id === leaderId) ?? party[0];
   const onSelect = useCallback((id: number) => setSelectedId(id), []);
   const onConfirm = useCallback(() => {
     if (selectedId !== null) choosePartner(selectedId);
@@ -153,6 +180,15 @@ export default function PlayScreen() {
         steps={steps}
         encounterRisk={encounterRisk}
         chunkLabel={`CHUNK ${chunkOf(position.x)},${chunkOf(position.y)}`}
+        isLead={partner ? partner.id === leaderId : false}
+        leadHint={
+          partner
+            ? leadTouched
+              ? `★ LEAD AKTIF · ${partner.name.toUpperCase()}`
+              : 'TAP KARTU → PARTY & LEAD'
+            : undefined
+        }
+        onOpenParty={onOpenParty}
       />
       <View style={styles.stage}>
         <WorldGrid worldSeed={worldSeed} position={position} partnerId={partner?.id} onMove={onMove} />
@@ -167,6 +203,17 @@ export default function PlayScreen() {
           onBattle={onBattle}
           onThrowBall={onThrowBall}
           onRun={onRun}
+        />
+      ) : null}
+
+      {leadSheet ? (
+        <LeadPickerSheet
+          visible
+          party={party}
+          leaderId={leaderId}
+          notice={leadNotice}
+          onPick={onPickLead}
+          onClose={onCloseParty}
         />
       ) : null}
     </SafeAreaView>

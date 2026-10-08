@@ -130,6 +130,22 @@ Damage follows the Gen-1 formula with STAB, a critical chance and the full moder
 Gen-1 species already carry Fairy/Steel typing (Clefairy, Magnemite), so a 15-type chart would
 silently mis-resolve those matchups.
 
+## Picking your lead
+
+Tap the partner card in the world HUD to open the party sheet (the card, not the whole HUD, so a
+mis-tap while walking never swaps a Pokémon). Each row shows HP, XP inside the current level, and a
+**combat rating** — `attack + defense + specialAttack + specialDefense + speed` at that Pokémon's
+level, graded A ≥ 150 / B ≥ 120 / C ≥ 100 / D below, from `src/features/party/logic/strength.ts`.
+Opening a row adds the six stats, each move's type/power/PP, and the member's rank inside the party.
+
+The lead wears a ★ in the HUD, in the party list and on the battle bench, and it is the Pokémon that
+steps out first. A fainted member (0 HP) cannot be made lead — the sheet says so and the battle falls
+through to the next healthy one — and the ★ stays where it is until you move it. The choice survives a
+reload: `leaderId` is part of the persisted run, and `updateMember` keeps it pointing at the right id
+when a member evolves (the evolution used to strand the lead on the old id, which paid 0 XP).
+
+Design reference: `design/lead-picker.html` (local mockup, ignored by git).
+
 ## Performance
 
 The rules were treated as acceptance criteria, not decoration:

@@ -13,6 +13,7 @@
     },
     "android": {
       "package": "com.agitafirstawan.pokedexquest",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#0A0E1A",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -30,6 +31,18 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ec0ea481-0979-4b16-ac1a-49be2994d537"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ec0ea481-0979-4b16-ac1a-49be2994d537"
     }
   }
 }

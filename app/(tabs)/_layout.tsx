@@ -2,18 +2,23 @@ import { Tabs } from 'expo-router';
 import { StyleSheet, View, type ColorValue } from 'react-native';
 
 import { colors, font } from '@/theme/tokens';
+import { Ionicons } from '@expo/vector-icons';
 
 const ICON = 15;
 
-function TabIcon({ shape, color }: { shape: 'play' | 'list'; color: ColorValue }) {
+function TabIcon({ shape, color }: { shape: 'play' | 'box' | 'bag' | 'list'; color: ColorValue }) {
   if (shape === 'play') {
-    return <View style={[styles.triangle, { borderLeftColor: color }]} />;
+    return <View  > <Ionicons name="play-outline" size={24} color={color} /></View>;
+  }
+  if (shape === 'box') {
+    return <View><Ionicons name="albums-outline" size={24} color={color} /></View>;
+  }
+  if (shape === 'bag') {
+    return <View><Ionicons name="bag-handle-outline" size={24} color={color} /></View>;
   }
   return (
     <View style={styles.stack}>
-      {[0, 1, 2].map((row) => (
-        <View key={row} style={[styles.bar, { backgroundColor: color }]} />
-      ))}
+      <Ionicons name="list-outline" size={24} color={color} />
     </View>
   );
 }
@@ -40,6 +45,20 @@ export default function TabsLayout() {
         options={{
           title: 'PLAY',
           tabBarIcon: ({ color }) => <TabIcon shape="play" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="storage"
+        options={{
+          title: 'STORAGE',
+          tabBarIcon: ({ color }) => <TabIcon shape="box" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="bags"
+        options={{
+          title: 'BAGS',
+          tabBarIcon: ({ color }) => <TabIcon shape="bag" color={color} />,
         }}
       />
       <Tabs.Screen

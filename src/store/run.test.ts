@@ -1,9 +1,32 @@
 import { createMember, INITIAL_BAG, PARTY_LIMIT } from '@/features/party/store/partySlice';
-import { isBlocked, nextPosition, SPAWN, tileAt, type Direction } from '@/features/world/logic/world';
+import { isBlocked, nextPosition, SPAWN, tileAt, type Direction, type Position } from '@/features/world/logic/world';
 import { caughtIdsOf, createRunStore, freshRun } from './index';
 
 const store = () => createRunStore();
 const DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
+
+/** The spawn is always a path, so its neighbours depend entirely on the seed. */
+const neighbourType = (seed: number, from: Position, direction: Direction) => {
+  const target = nextPosition(from, direction);
+  return tileAt(seed, target.x, target.y);
+};
+
+const openAtSpawn = (seed: number): Direction => {
+  const found = DIRECTIONS.find((direction) => !isBlocked(neighbourType(seed, SPAWN, direction)));
+  if (!found) throw new Error('this seed leaves the spawn with no walkable neighbour');
+  return found;
+};
+
+const blockedEdge = (seed: number): { from: Position; direction: Direction } => {
+  for (let y = SPAWN.y - 30; y <= SPAWN.y + 30; y += 1) {
+    for (let x = SPAWN.x - 30; x <= SPAWN.x + 30; x += 1) {
+      for (const direction of DIRECTIONS) {
+        if (isBlocked(neighbourType(seed, { x, y }, direction))) return { from: { x, y }, direction };
+      }
+    }
+  }
+  throw new Error('no water or rock next to any tile near the spawn');
+};
 
 describe('party slice', () => {
   it('starts empty with the documented starter kit', () => {
@@ -74,23 +97,25 @@ describe('party slice', () => {
 describe('world slice', () => {
   it('walks one step and counts it', () => {
     const run = store();
-    const moved = DIRECTIONS.filter((direction) => run.getState().walk(direction));
-    expect(moved.length).toBeGreaterThan(0);
-    expect(run.getState().steps).toBe(moved.length);
-    expect(run.getState().position).not.toEqual(SPAWN);
+    // Exactly one step: walking all four directions in turn cancels out and lands back on the spawn.
+    const direction = openAtSpawn(run.getState().worldSeed);
+
+    expect(run.getState().walk(direction)).toBe(true);
+    expect(run.getState().steps).toBe(1);
+    expect(run.getState().position).toEqual(nextPosition(SPAWN, direction));
   });
 
   it('refuses a step into water or rock and does not count it', () => {
     const run = store();
-    const seed = run.getState().worldSeed;
-    const blocked = DIRECTIONS.find((direction) => {
-      const target = nextPosition(SPAWN, direction);
-      return isBlocked(tileAt(seed, target.x, target.y));
-    });
+    // The spawn is ringed by walkable tiles, so hunt for a tile that does border water
+    // or rock instead of assuming one sits next door.
+    const edge = blockedEdge(run.getState().worldSeed);
 
-    expect(run.getState().walk(blocked as Direction)).toBe(false);
-    expect(run.getState().position).toEqual(SPAWN);
-    expect(run.getState().steps).toBe(0);
+    run.setState({ position: edge.from, steps: 3 });
+
+    expect(run.getState().walk(edge.direction)).toBe(false);
+    expect(run.getState().position).toEqual(edge.from);
+    expect(run.getState().steps).toBe(3);
   });
 
   it('resets the encounter risk when an encounter resolves', () => {

@@ -6,7 +6,7 @@ import { WorldHud } from './WorldHud';
 
 jest.mock('@/shared/components/Sprite', () => ({ Sprite: () => null }));
 
-const bag = { pokeBall: 10, greatBall: 2, potion: 3 };
+const bag = { pokeBall: 10, greatBall: 2, potion: 3, money: 132, hyperPotion: 1 };
 const base = { bag, steps: 12, encounterRisk: 0.2, chunkLabel: 'CHUNK 0,-1' };
 
 describe('WorldHud', () => {
@@ -40,5 +40,11 @@ describe('WorldHud', () => {
     const spent = partner.moves.reduce((total, slot) => total + slot.pp, 0);
     const max = partner.moves.reduce((total, slot) => total + maxPpOf(slot.name), 0);
     expect(view.getByText(new RegExp(`PP ${spent}/${max}`))).toBeTruthy();
+  });
+
+  it('shows the money next to the ball and potion counts', async () => {
+    const view = await render(<WorldHud partner={createMember(1, 5)} {...base} />);
+
+    expect(view.getByText(/\$ 132/)).toBeTruthy();
   });
 });
