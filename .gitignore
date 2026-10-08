@@ -39,7 +39,5 @@ yarn-error.*
 # generated native folders
 /ios
 /android
-
-# AI GENERATED FILES
 /openspec
 /design
