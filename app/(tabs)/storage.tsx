@@ -190,6 +190,7 @@ export default function StorageScreen() {
   const removePokemon = useCallback(() => {
     const ids = selection.kind === 'party' ? [selection.id] : selection.kind === 'storage' ? [selection.id] : [];
     releasePokemon(ids);
+    setSelection({ kind: 'none' });
   }, [releasePokemon, selection]);
 
   return (

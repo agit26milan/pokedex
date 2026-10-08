@@ -198,8 +198,7 @@ export const createPartySlice: StateCreator<PartySlice, [], [], PartySlice> = (s
     return outcome;
   },
   releasePokemon: (id: number[]) => {
-    const { storage, party } = get();
-    console.log(party, storage,id, 'party')
+    const { storage } = get();
     const newStorage = storage.filter((member) => !id.includes(member.id));
     set({  storage: newStorage });
   }
